@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>サイバー攻撃手法百科事典</title>
+  <link rel="stylesheet" href="src/styles/main.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="ti ti-shield-lock"></i> サイバー攻撃手法百科事典</h1>
+      <p>SC試験対策 - 39種の攻撃手法を学ぶ</p>
+    </header>
+
+    <div class="stats" id="stats"></div>
+
+    <div style="display:flex;justify-content:center;">
+      <input type="text" class="search-box" id="search" placeholder="攻撃名で検索...">
+    </div>
+
+    <div class="filter-bar" id="filters"></div>
+
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="modal-overlay" id="modal">
+    <div class="modal" id="modal-content"></div>
+  </div>
+
+  <script type="module">
+    import { attacks } from './src/data/attacks.js';
+
+    const categories = {
+      all: { label: 'すべて', icon: 'ti-apps' },
+      network: { label: 'ネットワーク', icon: 'ti-network' },
+      malware: { label: 'マルウェア', icon: 'ti-bug' },
+      social: { label: 'ソーシャル', icon: 'ti-users' },
+      web: { label: 'Web', icon: 'ti-world' },
+      ddos: { label: 'DoS/DDoS', icon: 'ti-bolt' },
+      intercept: { label: '傍受・盗聴', icon: 'ti-ear' },
+      misc: { label: 'その他', icon: 'ti-dots' }
+    };
+
+    let currentCategory = 'all';
+    let searchQuery = '';
+
+    function renderStats() {
+      const el = document.getElementById('stats');
+      const catCounts = {};
+      attacks.forEach(a => {
+        catCounts[a.category] = (catCounts[a.category] || 0) + 1;
+      });
+      el.innerHTML = `
+        <div class="stat-item">
+          <div class="stat-value">${attacks.length}</div>
+          <div class="stat-label">攻撃手法</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">7</div>
+          <div class="stat-label">カテゴリ</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">${attacks.filter(a => a.risk >= 4).length}</div>
+          <div class="stat-label">高リスク</div>
+        </div>
+      `;
+    }
+
+    function renderFilters() {
+      const el = document.getElementById('filters');
+      el.innerHTML = Object.entries(categories).map(([key, val]) => `
+        <button class="filter-btn ${key === currentCategory ? 'active' : ''}" data-cat="${key}">
+          <i class="${val.icon}"></i> ${val.label}
+        </button>
+      `).join('');
+
+      el.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentCategory = btn.dataset.cat;
+          renderFilters();
+          renderGrid();
+        });
+      });
+    }
+
+    function getRiskClass(risk) {
+      if (risk <= 2) return 'risk-low';
+      if (risk <= 3) return 'risk-mid';
+      return 'risk-high';
+    }
+
+    function renderCard(attack) {
+      return `
+        <div class="card" data-id="${attack.id}">
+          <div class="card-header">
+            <div>
+              <span class="card-id">#${attack.id}</span>
+              <h3 class="card-title">${attack.name}</h3>
+            </div>
+            <span class="badge badge-${attack.category}">${categories[attack.category].label}</span>
+          </div>
+          <div class="card-layer"><i class="ti ti-layers-intersect"></i> ${attack.layer}</div>
+          <div class="risk-bar ${getRiskClass(attack.risk)}">
+            ${[1,2,3,4,5].map(i => `<div class="risk-dot ${i <= attack.risk ? 'filled' : ''}"></div>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGrid() {
+      const el = document.getElementById('grid');
+      const filtered = attacks.filter(a => {
+        const catMatch = currentCategory === 'all' || a.category === currentCategory;
+        const searchMatch = !searchQuery || a.name.includes(searchQuery) || a.mechanism.includes(searchQuery);
+        return catMatch && searchMatch;
+      });
+      el.innerHTML = filtered.map(renderCard).join('');
+
+      el.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('click', () => {
+          const attack = attacks.find(a => a.id === parseInt(card.dataset.id));
+          openModal(attack);
+        });
+      });
+    }
+
+    function openModal(attack) {
+      const modal = document.getElementById('modal');
+      const content = document.getElementById('modal-content');
+
+      content.innerHTML = `
+        <div class="modal-header">
+          <div>
+            <span class="badge badge-${attack.category}" style="margin-bottom:0.5rem">${categories[attack.category].label}</span>
+            <h2 class="modal-title">${attack.name}</h2>
+          </div>
+          <button class="close-btn" id="close-modal"><i class="ti ti-x"></i></button>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-label">危険度</div>
+          <div class="risk-bar ${getRiskClass(attack.risk)}" style="width:fit-content">
+            ${[1,2,3,4,5].map(i => `<div class="risk-dot ${i <= attack.risk ? 'filled' : ''}"></div>`).join('')}
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-label">レイヤー / 対象</div>
+          <div class="detail-value">${attack.layer} / ${attack.target}</div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-label">攻撃メカニズム</div>
+          <div class="detail-value">${attack.mechanism}</div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-label">攻撃フロー</div>
+          <div class="flow-list">
+            ${attack.flow.map((step, i) => `
+              <span class="flow-step">${step}</span>
+              ${i < attack.flow.length - 1 ? '<span class="flow-arrow"><i class="ti ti-arrow-right"></i></span>' : ''}
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-label">対策</div>
+          <div class="detail-value">${attack.countermeasure}</div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-label">具体例</div>
+          <div class="example-box">${attack.example}</div>
+        </div>
+      `;
+
+      modal.classList.add('active');
+      document.getElementById('close-modal').addEventListener('click', closeModal);
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+    }
+
+    document.getElementById('modal').addEventListener('click', (e) => {
+      if (e.target.id === 'modal') closeModal();
+    });
+
+    document.getElementById('search').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderGrid();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    renderStats();
+    renderFilters();
+    renderGrid();
+  </script>
+</body>
+</html>

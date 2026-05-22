@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(**)",
+      "Write(src/**)",
+      "Write(index.html)",
+      "Write(CLAUDE.md)",
+      "Bash(open index.html)",
+      "Bash(find src -type f*)",
+      "Bash(cat src/**)",
+      "Bash(echo *)"
+    ],
+    "deny": [
+      "Bash(npm install*)",
+      "Bash(npm init*)",
+      "Bash(npx*)",
+      "Bash(curl*)",
+      "Bash(wget*)",
+      "Bash(rm -rf*)",
+      "Write(.env*)",
+      "Write(node_modules/**)"
+    ]
+  },
+  "model": "claude-opus-4-5",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '✅ ファイル保存: ' && echo $CLAUDE_TOOL_INPUT | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get('file_path',''))\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "false"
+  }
+}
