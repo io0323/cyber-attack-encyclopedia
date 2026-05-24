@@ -39,7 +39,7 @@
     }
 
     function renderDetail(attack) {
-      document.title = `${attack.name} | サイバー攻撃手法百科事典`;
+      document.title = `${attack.name} | Cyber Attack Encyclopedia`;
 
       const riskDots = [1,2,3,4,5].map(i =>
         `<div class="risk-dot ${i <= attack.risk ? 'r' + attack.risk : ''}"></div>`
@@ -60,7 +60,7 @@
         </div>
 
         <div class="detail-section">
-          <div class="detail-label">攻撃メカニズム</div>
+          <div class="detail-label">仕掛け方</div>
           <div class="detail-value">${attack.mechanism}</div>
         </div>
 
