@@ -98,8 +98,9 @@
         ).join('');
         const highRisk = a.risk === 5 ? 'is-risk-high' : '';
         const catLabel = categories[a.category]?.label || a.category;
+        const href = a.id === 2 ? 'detail-2.html' : `detail.html?id=${a.id}`;
 
-        return `<a href="detail.html?id=${a.id}" class="attack-row ${highRisk}" role="button" tabindex="0">
+        return `<a href="${href}" class="attack-row ${highRisk}" role="button" tabindex="0">
           <span class="row-id">No.${String(a.id).padStart(2, '0')}</span>
           <span class="row-name">${a.name}</span>
           <span class="badge badge-${a.category}">${catLabel}</span>
