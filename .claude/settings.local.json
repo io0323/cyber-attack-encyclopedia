@@ -9,7 +9,9 @@
       "Bash(git push *)",
       "Bash(gh repo *)",
       "Bash(gh auth *)",
-      "Bash(open /Users/io/projects/GitHub/WebProjects/cyber-attack-encyclopedia/index.html)"
+      "Bash(open /Users/io/projects/GitHub/WebProjects/cyber-attack-encyclopedia/index.html)",
+      "Bash(open \"detail.html?id=1\")",
+      "Bash(open /Users/io/projects/GitHub/WebProjects/cyber-attack-encyclopedia/detail.html)"
     ]
   }
 }
