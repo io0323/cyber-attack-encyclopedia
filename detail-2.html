@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ポートスキャン - サイバー攻撃手法百科事典</title>
+  <link rel="stylesheet" href="src/styles/main.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    .demo-controls { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+    .control-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .control-label { font-size: 13px; color: var(--color-text-secondary); min-width: 100px; }
+    .range-wrap { display: flex; align-items: center; gap: 0.5rem; flex: 1; font-family: monospace; font-size: 13px; }
+    .range-wrap input[type="range"] { flex: 1; max-width: 120px; }
+    .range-wrap input[type="number"] { width: 60px; padding: 4px 8px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg-primary); color: var(--color-text-primary); font-family: monospace; }
+    .range-value { min-width: 100px; }
+    .radio-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .radio-group label { display: flex; align-items: center; gap: 0.25rem; font-size: 13px; cursor: pointer; }
+    .btn-group { display: flex; gap: 0.5rem; }
+    .demo-btn.secondary { background: var(--color-bg-secondary); color: var(--color-text-primary); border: 1px solid var(--color-border); }
+    .port-map { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 1rem; padding: 1rem; background: var(--color-bg-secondary); border-radius: var(--radius-sm); }
+    .port-item { display: flex; flex-direction: column; align-items: center; padding: 8px; border-radius: var(--radius-sm); background: var(--color-bg-tertiary); min-width: 70px; font-size: 11px; transition: all 0.15s; }
+    .port-num { font-weight: 600; font-family: monospace; }
+    .port-name { color: var(--color-text-tertiary); margin-top: 2px; }
+    .port-item.open { background: #166534; color: #fff; }
+    .port-item.open .port-name { color: #bbf7d0; }
+    .port-item.closed { background: #374151; color: #9ca3af; }
+    .port-item.closed .port-name { color: #6b7280; }
+    .port-item.filtered { background: #854d0e; color: #fef08a; }
+    .port-item.filtered .port-name { color: #fde047; }
+    .port-item.scanning { animation: pulse 0.3s ease-in-out; box-shadow: 0 0 8px #3b82f6; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .demo-log { max-height: 200px; background: #0d1117; color: #58a6ff; }
+    .log-open { color: #3fb950; }
+    .log-closed { color: #6e7681; }
+    .log-filtered { color: #d29922; }
+    .log-summary { color: #58a6ff; }
+    .log-warning { color: #f85149; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="index.html" class="nav-btn"><i class="ti ti-arrow-left"></i> 一覧に戻る</a>
+      <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替"><i class="ti ti-moon"></i></button>
+    </header>
+
+    <div class="detail-header">
+      <div>
+        <h1 class="detail-title">No.02 ポートスキャン</h1>
+        <div class="detail-meta">
+          <span class="badge badge-network">ネットワーク</span>
+          <div class="risk-bar" id="riskBar"></div>
+        </div>
+      </div>
+      <div class="detail-nav">
+        <a href="detail.html?id=1" class="nav-btn"><i class="ti ti-chevron-left"></i> No.01</a>
+        <a href="detail.html?id=3" class="nav-btn">No.03 <i class="ti ti-chevron-right"></i></a>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">仕掛け方</div>
+      <div class="detail-value">TCPポートに接続試行し、開いているサービスを特定する</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">攻撃フロー</div>
+      <div class="flow-list">
+        <span class="flow-step">ポート番号指定</span><i class="ti ti-arrow-right flow-arrow"></i>
+        <span class="flow-step">SYN送信</span><i class="ti ti-arrow-right flow-arrow"></i>
+        <span class="flow-step">応答確認</span><i class="ti ti-arrow-right flow-arrow"></i>
+        <span class="flow-step">サービス特定</span>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-section">
+        <div class="detail-label">攻撃対象</div>
+        <div class="detail-value">特定ホスト</div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-label">レイヤー</div>
+        <div class="detail-value">偵察フェーズ</div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">対策</div>
+      <div class="detail-value">不要ポート閉鎖、ポートスキャン検知ツール導入</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">実例</div>
+      <div class="example-box">nmap -sS 192.168.1.1</div>
+    </div>
+
+    <div class="demo-section">
+      <div class="demo-title"><i class="ti ti-scan"></i> ポートスキャン シミュレーター</div>
+      <div class="demo-container">
+        <div class="demo-controls">
+          <div class="control-row">
+            <span class="control-label">ターゲットIP</span>
+            <div class="range-wrap">
+              <span>192.168.1.</span>
+              <input type="number" id="targetOctet" min="1" max="254" value="1">
+            </div>
+          </div>
+          <div class="control-row">
+            <span class="control-label">スキャン範囲</span>
+            <div class="range-wrap">
+              <span>ポート</span>
+              <input type="range" id="portStart" min="1" max="1022" value="1">
+              <span>〜</span>
+              <input type="range" id="portEnd" min="2" max="1023" value="1023">
+              <span class="range-value" id="portDisplay">1 - 1023</span>
+            </div>
+          </div>
+          <div class="control-row">
+            <span class="control-label">スキャン方式</span>
+            <div class="radio-group">
+              <label><input type="radio" name="scanType" value="syn" checked> TCP SYN</label>
+              <label><input type="radio" name="scanType" value="connect"> TCP Connect</label>
+              <label><input type="radio" name="scanType" value="udp"> UDP Scan</label>
+            </div>
+          </div>
+          <div class="control-row">
+            <div class="btn-group">
+              <button class="demo-btn" id="startBtn"><i class="ti ti-player-play"></i> スキャン開始</button>
+              <button class="demo-btn secondary" id="stopBtn" disabled><i class="ti ti-player-stop"></i> 中断</button>
+            </div>
+          </div>
+        </div>
+        <div class="port-map" id="portMap"></div>
+        <div class="demo-log" id="logArea"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const WELL_KNOWN_PORTS = {
+      20: 'FTP-data', 21: 'FTP', 22: 'SSH', 23: 'Telnet',
+      25: 'SMTP', 53: 'DNS', 67: 'DHCP', 80: 'HTTP',
+      110: 'POP3', 143: 'IMAP', 443: 'HTTPS', 445: 'SMB',
+      3306: 'MySQL', 3389: 'RDP', 5432: 'PostgreSQL', 8080: 'HTTP-alt'
+    };
+    const DANGEROUS_PORTS = [21, 23, 3389];
+
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      updateThemeIcon();
+    }
+
+    function updateThemeIcon() {
+      const btn = document.getElementById('themeToggle');
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (btn) btn.innerHTML = isDark ? '<i class="ti ti-sun"></i>' : '<i class="ti ti-moon"></i>';
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+      }
+      updateThemeIcon();
+    }
+
+    document.getElementById('riskBar').innerHTML = [1,2,3,4,5].map(i =>
+      `<div class="risk-dot ${i <= 2 ? 'r2' : ''}"></div>`
+    ).join('');
+
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    initTheme();
+
+    const portMap = document.getElementById('portMap');
+    const logArea = document.getElementById('logArea');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const portStart = document.getElementById('portStart');
+    const portEnd = document.getElementById('portEnd');
+    const portDisplay = document.getElementById('portDisplay');
+    const targetOctet = document.getElementById('targetOctet');
+
+    let portStatus = {};
+    let scanInterval = null;
+
+    function initPorts() {
+      portMap.innerHTML = '';
+      portStatus = {};
+      Object.keys(WELL_KNOWN_PORTS).forEach(port => {
+        const rand = Math.random();
+        let status;
+        if (rand < 0.2) status = 'open';
+        else if (rand < 0.85) status = 'closed';
+        else status = 'filtered';
+        portStatus[port] = status;
+
+        const div = document.createElement('div');
+        div.className = 'port-item';
+        div.id = `port-${port}`;
+        div.innerHTML = `<span class="port-num">${port}</span><span class="port-name">${WELL_KNOWN_PORTS[port]}</span>`;
+        portMap.appendChild(div);
+      });
+    }
+
+    function updatePortDisplay() {
+      let start = parseInt(portStart.value);
+      let end = parseInt(portEnd.value);
+      if (start > end) { const t = start; start = end; end = t; }
+      portDisplay.textContent = `${start} - ${end}`;
+    }
+
+    portStart.addEventListener('input', updatePortDisplay);
+    portEnd.addEventListener('input', updatePortDisplay);
+
+    function formatTime(ms) {
+      const s = Math.floor(ms / 1000);
+      const m = ms % 1000;
+      return `${String(Math.floor(s / 60)).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}.${String(m).padStart(3,'0')}`;
+    }
+
+    function log(text, cls) {
+      const line = document.createElement('div');
+      line.className = 'demo-log-line' + (cls ? ' ' + cls : '');
+      line.textContent = text;
+      logArea.appendChild(line);
+      logArea.scrollTop = logArea.scrollHeight;
+    }
+
+    function startScan() {
+      initPorts();
+      logArea.innerHTML = '';
+
+      let start = parseInt(portStart.value);
+      let end = parseInt(portEnd.value);
+      if (start > end) { const t = start; start = end; end = t; }
+
+      const octet = Math.min(254, Math.max(1, parseInt(targetOctet.value) || 1));
+      const targetIP = `192.168.1.${octet}`;
+      const scanType = document.querySelector('input[name="scanType"]:checked').value;
+      const typeLabel = { syn: 'TCP SYN', connect: 'TCP Connect', udp: 'UDP' }[scanType];
+
+      const portsToScan = Object.keys(WELL_KNOWN_PORTS).map(Number).filter(p => p >= start && p <= end).sort((a,b) => a - b);
+      let idx = 0;
+      let openCount = 0, closedCount = 0, filteredCount = 0;
+      const openPorts = [];
+      const startTime = Date.now();
+
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+
+      log(`スキャン開始: ${targetIP} ポート ${start}-${end} (${typeLabel})`);
+
+      if (portsToScan.length === 0) {
+        log('対象ポートがありません', 'log-summary');
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        return;
+      }
+
+      scanInterval = setInterval(() => {
+        if (idx >= portsToScan.length) {
+          clearInterval(scanInterval);
+          scanInterval = null;
+          const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+          log('=============================', 'log-summary');
+          log(`スキャン完了: ${portsToScan.length}ポート`, 'log-summary');
+          log(`  Open: ${openCount}  Closed: ${closedCount}  Filtered: ${filteredCount}`, 'log-summary');
+          log(`所要時間: ${elapsed}秒`, 'log-summary');
+          log('=============================', 'log-summary');
+
+          const dangerOpen = openPorts.filter(p => DANGEROUS_PORTS.includes(p));
+          if (dangerOpen.length > 0) {
+            log('', 'log-warning');
+            log('⚠ 危険なポートが開いています:', 'log-warning');
+            dangerOpen.forEach(p => {
+              log(`  ${p} (${WELL_KNOWN_PORTS[p]}) - セキュリティリスクあり`, 'log-warning');
+            });
+          }
+
+          startBtn.disabled = false;
+          stopBtn.disabled = true;
+          return;
+        }
+
+        const port = portsToScan[idx];
+        const el = document.getElementById(`port-${port}`);
+        if (el) {
+          el.classList.remove('scanning', 'open', 'closed', 'filtered');
+          el.classList.add('scanning');
+        }
+
+        const status = portStatus[port];
+        const elapsed = Date.now() - startTime;
+
+        setTimeout(() => {
+          if (el) {
+            el.classList.remove('scanning');
+            el.classList.add(status);
+          }
+        }, 40);
+
+        if (status === 'open') {
+          log(`[${formatTime(elapsed)}] ${port}/${WELL_KNOWN_PORTS[port]} ... OPEN ✅`, 'log-open');
+          openCount++;
+          openPorts.push(port);
+        } else if (status === 'closed') {
+          log(`[${formatTime(elapsed)}] ${port}/${WELL_KNOWN_PORTS[port]} ... closed`, 'log-closed');
+          closedCount++;
+        } else {
+          log(`[${formatTime(elapsed)}] ${port}/${WELL_KNOWN_PORTS[port]} ... filtered ⚡`, 'log-filtered');
+          filteredCount++;
+        }
+
+        idx++;
+      }, 150);
+    }
+
+    function stopScan() {
+      if (scanInterval) {
+        clearInterval(scanInterval);
+        scanInterval = null;
+        log('--- 中断しました ---', 'log-summary');
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+      }
+    }
+
+    startBtn.addEventListener('click', startScan);
+    stopBtn.addEventListener('click', stopScan);
+
+    initPorts();
+  </script>
+</body>
+</html>
