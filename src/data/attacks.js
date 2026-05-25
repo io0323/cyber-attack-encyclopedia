@@ -1,4 +1,4 @@
-export const attacks = [
+window.attacks = [
   {
     id: 1,
     name: "ネットワークスキャン",

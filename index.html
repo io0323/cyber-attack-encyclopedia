@@ -20,8 +20,9 @@
     <div class="attack-list" id="list"></div>
   </div>
 
+  <script src="./src/data/attacks.js"></script>
   <script type="module">
-    import { attacks } from './src/data/attacks.js';
+    const attacks = window.attacks;
 
     const categories = {
       all: { label: 'すべて', icon: 'ti-apps' },
@@ -67,7 +68,7 @@
       if (!el) return;
       el.innerHTML = Object.entries(categories).map(([key, val]) =>
         `<button class="filter-btn ${key === currentCategory ? 'active' : ''}" data-cat="${key}">
-          <i class="${val.icon}"></i> ${val.label}
+          <i class="ti ${val.icon}"></i> ${val.label}
         </button>`
       ).join('');
 
