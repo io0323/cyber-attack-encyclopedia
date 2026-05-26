@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>バッファオーバフロー攻撃 - サイバー攻撃手法百科事典</title>
+  <link rel="stylesheet" href="src/styles/main.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    .code-block { background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: var(--radius-sm); font-family: monospace; font-size: 13px; margin-bottom: 1rem; overflow-x: auto; }
+    .code-line { display: flex; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .line-num { color: #6e7681; min-width: 30px; user-select: none; }
+    .kw { color: #569cd6; }
+    .type { color: #4ec9b0; }
+    .str { color: #ce9178; }
+    .comment { color: #6a9955; }
+    .fn { color: #dcdcaa; }
+    .danger { background: rgba(248,81,73,0.2); cursor: pointer; position: relative; }
+    .tooltip { position: absolute; bottom: 100%; left: 0; background: #1f2937; color: #f3f4f6; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 12px; white-space: nowrap; display: none; z-index: 10; }
+    .danger:hover .tooltip { display: block; }
+    .demo-controls { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+    .control-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .control-label { font-size: 13px; color: var(--color-text-secondary); min-width: 80px; }
+    .input-wrap { display: flex; align-items: center; gap: 0.5rem; flex: 1; }
+    .input-wrap input[type="text"] { flex: 1; max-width: 300px; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg-primary); color: var(--color-text-primary); font-family: monospace; }
+    .input-wrap input[type="range"] { width: 150px; }
+    .char-count { font-family: monospace; font-size: 12px; color: var(--color-text-tertiary); min-width: 60px; }
+    .preset-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .preset-btn { padding: 6px 12px; font-size: 12px; background: var(--color-bg-tertiary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-primary); }
+    .preset-btn:hover { border-color: var(--color-border-hover); }
+    .btn-group { display: flex; gap: 0.5rem; }
+    .demo-btn.secondary { background: var(--color-bg-secondary); color: var(--color-text-primary); border: 1px solid var(--color-border); }
+    .stack-area { display: flex; gap: 2rem; justify-content: center; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; }
+    .stack-svg { background: var(--color-bg-secondary); border-radius: var(--radius-sm); }
+    .step-msg { background: #0d1117; color: #58a6ff; padding: 1rem; border-radius: var(--radius-sm); font-family: monospace; font-size: 13px; min-height: 80px; }
+    .step-warn { color: #d29922; }
+    .step-danger { color: #f85149; }
+    .step-success { color: #3fb950; }
+    .terminal-output { background: #000; color: #22c55e; padding: 0.5rem; border-radius: var(--radius-sm); font-family: monospace; font-size: 12px; margin-top: 0.5rem; }
+    .countermeasure-panel { margin-top: 1.5rem; }
+    .countermeasure-title { font-size: 14px; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .countermeasure-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .countermeasure-item { background: var(--color-bg-primary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); overflow: hidden; }
+    .countermeasure-header { padding: 10px 14px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 13px; }
+    .countermeasure-header:hover { background: var(--color-bg-secondary); }
+    .countermeasure-detail { padding: 0 14px; max-height: 0; overflow: hidden; transition: all 0.2s; font-size: 12px; color: var(--color-text-secondary); }
+    .countermeasure-item.open .countermeasure-detail { max-height: 100px; padding: 10px 14px; }
+    .bad { color: var(--risk-5); }
+    .good { color: var(--risk-1); }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .cell-blink { animation: blink 0.5s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="index.html" class="nav-btn"><i class="ti ti-arrow-left"></i> 一覧に戻る</a>
+      <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替"><i class="ti ti-moon"></i></button>
+    </header>
+
+    <div class="detail-header">
+      <div>
+        <h1 class="detail-title">No.03 バッファオーバフロー攻撃</h1>
+        <div class="detail-meta">
+          <span class="badge badge-misc">その他</span>
+          <div class="risk-bar" id="riskBar"></div>
+        </div>
+      </div>
+      <div class="detail-nav">
+        <a href="detail-2.html" class="nav-btn"><i class="ti ti-chevron-left"></i> No.02</a>
+        <a href="detail.html?id=4" class="nav-btn">No.04 <i class="ti ti-chevron-right"></i></a>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">仕掛け方</div>
+      <div class="detail-value">入力バッファの境界を超えるデータを送り、メモリを上書きして任意コード実行</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">攻撃フロー</div>
+      <div class="flow-list">
+        <span class="flow-step">脆弱性特定</span><i class="ti ti-arrow-right flow-arrow"></i>
+        <span class="flow-step">ペイロード作成</span><i class="ti ti-arrow-right flow-arrow"></i>
+        <span class="flow-step">バッファ溢れ</span><i class="ti ti-arrow-right flow-arrow"></i>
+        <span class="flow-step">制御奪取</span>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-section">
+        <div class="detail-label">攻撃対象</div>
+        <div class="detail-value">脆弱なプログラム</div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-label">レイヤー</div>
+        <div class="detail-value">アプリケーション層</div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">対策</div>
+      <div class="detail-value">ASLR、DEP、スタックカナリア、入力検証</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">実例</div>
+      <div class="example-box">スタックベースBOFでシェルコード実行</div>
+    </div>
+
+    <div class="demo-section">
+      <div class="demo-title"><i class="ti ti-stack"></i> バッファオーバフロー シミュレーター</div>
+      <div class="demo-container">
+        <div class="code-block">
+          <div class="code-line"><span class="line-num">1</span><span class="type">void</span> <span class="fn">vulnerable</span>(<span class="type">char</span> *input) {</div>
+          <div class="code-line"><span class="line-num">2</span>  <span class="type">char</span> buffer[<span class="str">8</span>];        <span class="comment">// ← 8バイトのバッファ</span></div>
+          <div class="code-line danger"><span class="line-num">3</span>  <span class="fn">strcpy</span>(buffer, input); <span class="comment">// ← 境界チェックなし！危険</span><div class="tooltip">strcpy()は入力長をチェックしないため、8バイトを超える入力でバッファ外に書き込みが発生</div></div>
+          <div class="code-line"><span class="line-num">4</span>}</div>
+        </div>
+
+        <div class="demo-controls">
+          <div class="control-row">
+            <span class="control-label">入力データ</span>
+            <div class="input-wrap">
+              <input type="text" id="inputText" maxlength="24" placeholder="入力してください">
+              <input type="range" id="inputSlider" min="0" max="24" value="0">
+              <span class="char-count" id="charCount">0 / 24</span>
+            </div>
+          </div>
+          <div class="control-row">
+            <span class="control-label">プリセット</span>
+            <div class="preset-btns">
+              <button class="preset-btn" data-val="Hello">正常入力</button>
+              <button class="preset-btn" data-val="AAAAAAAA">境界ぴったり</button>
+              <button class="preset-btn" data-val="AAAAAAAAAAAAAAAA">オーバーフロー</button>
+              <button class="preset-btn" data-val="AAAAAAAA\xef\xbe\xad\xde">シェルコード注入</button>
+            </div>
+          </div>
+          <div class="control-row">
+            <div class="btn-group">
+              <button class="demo-btn" id="stepBtn"><i class="ti ti-player-track-next"></i> ステップ実行</button>
+              <button class="demo-btn secondary" id="resetBtn"><i class="ti ti-refresh"></i> リセット</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack-area">
+          <svg id="stackSvg" class="stack-svg" width="280" height="200" viewBox="0 0 280 200"></svg>
+          <div class="step-msg" id="stepMsg">入力を設定して「ステップ実行」を押してください</div>
+        </div>
+
+        <div class="countermeasure-panel">
+          <div class="countermeasure-title"><i class="ti ti-shield-check"></i> この攻撃を防ぐには</div>
+          <div class="countermeasure-list" id="countermeasures"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      updateThemeIcon();
+    }
+    function updateThemeIcon() {
+      const btn = document.getElementById('themeToggle');
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (btn) btn.innerHTML = isDark ? '<i class="ti ti-sun"></i>' : '<i class="ti ti-moon"></i>';
+    }
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.toggleAttribute('data-theme', !isDark);
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+      updateThemeIcon();
+    }
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    document.getElementById('riskBar').innerHTML = [1,2,3,4,5].map(i => `<div class="risk-dot ${i <= 5 ? 'r5' : ''}"></div>`).join('');
+    initTheme();
+
+    const svg = document.getElementById('stackSvg');
+    const stepMsg = document.getElementById('stepMsg');
+    const inputText = document.getElementById('inputText');
+    const inputSlider = document.getElementById('inputSlider');
+    const charCount = document.getElementById('charCount');
+    const stepBtn = document.getElementById('stepBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    const CELL_W = 40, CELL_H = 28, COLS = 4;
+    const REGIONS = [
+      { name: 'args', label: '引数 *input', bytes: 4, color: 'var(--color-bg-secondary)' },
+      { name: 'ret', label: 'Return Address', bytes: 4, color: 'var(--color-bg-tertiary)' },
+      { name: 'ebp', label: 'Saved EBP', bytes: 4, color: 'var(--color-bg-tertiary)' },
+      { name: 'buf', label: 'buffer[8]', bytes: 8, color: 'var(--color-bg-tertiary)' }
+    ];
+    const BASE_ADDR = 0xffffd000;
+
+    let currentStep = 0;
+    let inputData = '';
+    let cells = [];
+    let copyIndex = 0;
+    let copyInterval = null;
+
+    function drawStack() {
+      svg.innerHTML = '';
+      cells = [];
+      let y = 10;
+      let byteOffset = 0;
+      REGIONS.forEach(region => {
+        const rows = Math.ceil(region.bytes / COLS);
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < COLS; c++) {
+            const idx = r * COLS + c;
+            if (idx >= region.bytes) break;
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', 10 + c * CELL_W);
+            rect.setAttribute('y', y);
+            rect.setAttribute('width', CELL_W - 2);
+            rect.setAttribute('height', CELL_H - 2);
+            rect.setAttribute('fill', region.color);
+            rect.setAttribute('stroke', 'var(--color-border)');
+            rect.setAttribute('rx', 3);
+            rect.dataset.region = region.name;
+            rect.dataset.idx = byteOffset + idx;
+            svg.appendChild(rect);
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', 10 + c * CELL_W + CELL_W / 2 - 1);
+            text.setAttribute('y', y + CELL_H / 2 + 4);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('font-size', '10');
+            text.setAttribute('fill', 'var(--color-text-tertiary)');
+            text.dataset.cellText = byteOffset + idx;
+            svg.appendChild(text);
+            cells.push({ rect, text, region: region.name, idx: byteOffset + idx });
+          }
+          y += CELL_H;
+        }
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', 180);
+        label.setAttribute('y', y - rows * CELL_H / 2 + 4);
+        label.setAttribute('font-size', '11');
+        label.setAttribute('fill', 'var(--color-text-secondary)');
+        const addr = (BASE_ADDR + 20 - byteOffset).toString(16);
+        label.textContent = `0x${addr} ${region.label}`;
+        svg.appendChild(label);
+        byteOffset += region.bytes;
+      });
+    }
+
+    function updateInput() {
+      inputData = inputText.value;
+      inputSlider.value = inputData.length;
+      charCount.textContent = `${inputData.length} / 24`;
+      updateStackPreview();
+    }
+
+    function updateStackPreview() {
+      cells.forEach(c => {
+        c.rect.setAttribute('fill', REGIONS.find(r => r.name === c.region).color);
+        c.rect.classList.remove('cell-blink');
+        c.text.textContent = '';
+      });
+    }
+
+    inputText.addEventListener('input', updateInput);
+    inputSlider.addEventListener('input', () => {
+      const len = parseInt(inputSlider.value);
+      if (inputData.length > len) inputText.value = inputData.slice(0, len);
+      else inputText.value = inputData.padEnd(len, 'A');
+      updateInput();
+    });
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        inputText.value = btn.dataset.val;
+        updateInput();
+        resetSteps();
+      });
+    });
+
+    function resetSteps() {
+      currentStep = 0;
+      if (copyInterval) clearInterval(copyInterval);
+      copyInterval = null;
+      copyIndex = 0;
+      stepMsg.innerHTML = '入力を設定して「ステップ実行」を押してください';
+      updateStackPreview();
+    }
+
+    resetBtn.addEventListener('click', () => {
+      inputText.value = '';
+      updateInput();
+      resetSteps();
+    });
+
+    stepBtn.addEventListener('click', () => {
+      if (!inputData) { stepMsg.innerHTML = '<span class="step-warn">⚠ 入力を設定してください</span>'; return; }
+      currentStep++;
+      runStep();
+    });
+
+    function runStep() {
+      const len = inputData.length;
+      if (currentStep === 1) {
+        stepMsg.innerHTML = 'Step 1: <span class="step-success">vulnerable()が呼び出されました</span><br>→ スタックフレームが構築されます';
+        drawStack();
+      } else if (currentStep === 2) {
+        stepMsg.innerHTML = 'Step 2: strcpy()が入力をbufferにコピー開始...';
+        copyIndex = 0;
+        copyInterval = setInterval(() => {
+          if (copyIndex >= len) { clearInterval(copyInterval); copyInterval = null; currentStep++; setTimeout(runStep, 300); return; }
+          const bufStart = 12;
+          const cellIdx = bufStart + copyIndex;
+          const cell = cells.find(c => c.idx === cellIdx);
+          if (cell) {
+            const ch = inputData[copyIndex];
+            const hex = ch.charCodeAt(0).toString(16).padStart(2, '0');
+            cell.text.textContent = hex;
+            if (copyIndex < 8) cell.rect.setAttribute('fill', 'var(--risk-1)');
+            else if (copyIndex < 12) cell.rect.setAttribute('fill', 'var(--risk-3)');
+            else cell.rect.setAttribute('fill', 'var(--risk-5)');
+          }
+          copyIndex++;
+        }, 100);
+      } else if (currentStep === 3) {
+        if (len > 8 && len <= 12) {
+          stepMsg.innerHTML = 'Step 3: <span class="step-warn">⚠ バッファ境界を超えました！</span><br>→ Saved EBP が上書きされています';
+          cells.filter(c => c.region === 'ebp').forEach(c => c.rect.classList.add('cell-blink'));
+        } else if (len > 12) {
+          stepMsg.innerHTML = 'Step 3: <span class="step-danger">💀 リターンアドレスが上書きされました！</span><br>→ 攻撃者が指定したアドレス: <strong>0xdeadbeef</strong>';
+          cells.filter(c => c.region === 'ret').forEach(c => { c.rect.setAttribute('fill', 'var(--risk-5)'); c.rect.classList.add('cell-blink'); });
+        } else {
+          stepMsg.innerHTML = 'Step 3: <span class="step-success">✓ 正常終了</span><br>→ バッファ内に収まりました';
+        }
+      } else if (currentStep === 4) {
+        if (len > 12) {
+          stepMsg.innerHTML = 'Step 4: 関数からリターン → <span class="step-danger">0xdeadbeef</span> に制御が移りました<div class="terminal-output">$ /bin/sh<br>sh-4.4# whoami<br>root<br>sh-4.4# _</div>';
+        } else if (len > 8) {
+          stepMsg.innerHTML = 'Step 4: 関数からリターン → <span class="step-warn">クラッシュ (Segmentation Fault)</span>';
+        } else {
+          stepMsg.innerHTML = 'Step 4: 関数から正常にリターンしました';
+        }
+        currentStep = 0;
+      }
+    }
+
+    const countermeasures = [
+      { bad: 'strcpy', good: 'strncpy', detail: 'strncpy()は最大コピー長を指定でき、バッファサイズを超える書き込みを防止します。' },
+      { bad: 'gets', good: 'fgets', detail: 'fgets()はバッファサイズを引数で指定し、それ以上読み込みません。gets()は使用禁止です。' },
+      { icon: '✅', label: 'ASLR（アドレス空間配置のランダム化）', detail: 'スタック・ヒープ・ライブラリのアドレスをランダム化し、攻撃者が飛び先を予測困難にします。' },
+      { icon: '✅', label: 'DEP/NX（データ実行防止）', detail: 'スタック領域を実行不可にマークし、注入されたシェルコードの実行を防止します。' },
+      { icon: '✅', label: 'Stack Canary（スタック保護）', detail: 'リターンアドレス手前に検知用の値を配置し、上書きを検出するとプログラムを終了します。' }
+    ];
+
+    const cmList = document.getElementById('countermeasures');
+    countermeasures.forEach((cm, i) => {
+      const div = document.createElement('div');
+      div.className = 'countermeasure-item';
+      const header = cm.bad
+        ? `<span class="bad">❌ ${cm.bad}</span> → <span class="good">✅ ${cm.good}</span>`
+        : `<span class="good">${cm.icon} ${cm.label}</span>`;
+      div.innerHTML = `<div class="countermeasure-header">${header}</div><div class="countermeasure-detail">${cm.detail}</div>`;
+      div.querySelector('.countermeasure-header').addEventListener('click', () => div.classList.toggle('open'));
+      cmList.appendChild(div);
+    });
+
+    drawStack();
+  </script>
+</body>
+</html>
