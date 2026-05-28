@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>辞書攻撃 - サイバー攻撃手法百科事典</title>
+  <link rel="stylesheet" href="src/styles/main.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    .demo-controls { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+    .control-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .control-label { font-size: 13px; color: var(--color-text-secondary); min-width: 100px; }
+    .input-wrap input[type="text"] { padding: 8px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg-primary); color: var(--color-text-primary); font-family: monospace; width: 150px; }
+    .hint { font-size: 11px; color: var(--color-text-tertiary); margin-top: 0.25rem; }
+    .radio-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .radio-group label { display: flex; align-items: center; gap: 0.5rem; font-size: 13px; cursor: pointer; }
+    .custom-dict { width: 100%; max-width: 300px; height: 80px; padding: 8px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg-primary); color: var(--color-text-primary); font-family: monospace; font-size: 12px; resize: vertical; margin-top: 0.5rem; display: none; }
+    .custom-dict.show { display: block; }
+    .speed-wrap { display: flex; align-items: center; gap: 0.5rem; }
+    .speed-wrap input[type="range"] { width: 120px; }
+    .speed-value { font-family: monospace; font-size: 13px; min-width: 60px; }
+    .btn-group { display: flex; gap: 0.5rem; }
+    .demo-btn.secondary { background: var(--color-bg-secondary); color: var(--color-text-primary); border: 1px solid var(--color-border); }
+    .demo-btn.danger { background: var(--risk-5); }
+    .dict-list { height: 240px; overflow-y: auto; background: #0d1117; border-radius: var(--radius-sm); padding: 0.5rem; margin-bottom: 1rem; }
+    .dict-item { display: flex; align-items: center; gap: 0.75rem; padding: 6px 10px; font-family: monospace; font-size: 12px; border-radius: 4px; }
+    .dict-num { color: #6e7681; min-width: 35px; }
+    .dict-pw { background: #21262d; padding: 4px 10px; border-radius: 4px; min-width: 120px; color: #c9d1d9; }
+    .dict-status { min-width: 80px; }
+    .dict-item.pending { color: #484f58; }
+    .dict-item.trying { background: rgba(234,179,8,0.1); }
+    .dict-item.trying .dict-pw { background: #3d3200; color: #f0c000; }
+    .dict-item.trying .dict-status { color: #f0c000; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .dict-item.trying { animation: pulse 0.5s ease-in-out infinite; }
+    .dict-item.failed .dict-status { color: #6e7681; }
+    .dict-item.success { background: rgba(63,185,80,0.15); }
+    .dict-item.success .dict-pw { background: #0d3321; color: #3fb950; font-weight: 600; }
+    .dict-item.success .dict-status { color: #3fb950; font-weight: 600; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .dict-item.success { animation: blink 0.3s ease-in-out 3; }
+    .stats-panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+    .stat-card { background: var(--color-bg-primary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 0.75rem; text-align: center; }
+    .stat-label { font-size: 11px; color: var(--color-text-tertiary); }
+    .stat-value { font-size: 1.1rem; font-weight: 600; font-family: monospace; }
+    .current-attempt { background: var(--color-bg-primary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 1rem; text-align: center; margin-bottom: 1rem; }
+    .current-label { font-size: 12px; color: var(--color-text-tertiary); }
+    .current-value { font-size: 1.75rem; font-weight: 700; font-family: monospace; color: var(--color-accent); }
+    .result-panel { display: none; background: var(--color-bg-primary); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1rem; }
+    .result-panel.show { display: block; }
+    .result-panel.success { border-color: #3fb950; background: linear-gradient(135deg, rgba(22,101,52,0.2), rgba(21,128,61,0.1)); }
+    .result-panel.fail { border-color: #6e7681; }
+    .result-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+    .result-title.success { color: #3fb950; }
+    .compare-table { width: 100%; font-size: 13px; border-collapse: collapse; margin-top: 1rem; }
+    .compare-table th, .compare-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--color-border); }
+    .compare-table th { color: var(--color-text-tertiary); font-weight: 500; }
+    .compare-slow { color: var(--risk-5); }
+    .compare-fast { color: #3fb950; font-weight: 600; }
+    .countermeasure-panel { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border); }
+    .countermeasure-title { font-size: 14px; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .countermeasure-list { display: flex; flex-direction: column; gap: 0.5rem; font-size: 13px; }
+    .countermeasure-item { display: flex; align-items: flex-start; gap: 0.5rem; padding: 8px 12px; background: var(--color-bg-primary); border-radius: var(--radius-sm); }
+    .bad { color: var(--risk-5); }
+    .good { color: var(--risk-1); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="index.html" class="nav-btn"><i class="ti ti-arrow-left"></i> 一覧に戻る</a>
+      <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替"><i class="ti ti-moon"></i></button>
+    </header>
+
+    <div class="detail-header">
+      <div>
+        <h1 class="detail-title">No.05 辞書攻撃</h1>
+        <div class="detail-meta">
+          <span class="badge badge-misc">その他</span>
+          <div class="risk-bar" id="riskBar"></div>
+        </div>
+      </div>
+      <div class="detail-nav">
+        <a href="detail-4.html" class="nav-btn"><i class="ti ti-chevron-left"></i> No.04</a>
+        <a href="detail.html?id=6" class="nav-btn">No.06 <i class="ti ti-chevron-right"></i></a>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">仕掛け方</div>
+      <div class="detail-value">よく使われるパスワードリストを使って効率的に認証突破を試みる</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">攻撃フロー</div>
+      <div class="flow-list">
+        <span class="flow-step">辞書ファイル準備</span><i class="ti ti-arrow-right flow-arrow"></i>
+        <span class="flow-step">順次試行</span><i class="ti ti-arrow-right flow-arrow"></i>
+        <span class="flow-step">一致確認</span><i class="ti ti-arrow-right flow-arrow"></i>
+        <span class="flow-step">侵入</span>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-section">
+        <div class="detail-label">攻撃対象</div>
+        <div class="detail-value">認証システム</div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-label">レイヤー</div>
+        <div class="detail-value">認証フェーズ</div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">対策</div>
+      <div class="detail-value">複雑なパスワードポリシー、アカウントロック</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">実例</div>
+      <div class="example-box">rockyou.txtを使用したSSH攻撃</div>
+    </div>
+
+    <div class="demo-section">
+      <div class="demo-title"><i class="ti ti-book"></i> 辞書攻撃 シミュレーター</div>
+      <div class="demo-container">
+        <div class="demo-controls">
+          <div class="control-row">
+            <span class="control-label">正解パスワード</span>
+            <div>
+              <div class="input-wrap"><input type="text" id="targetPw" value="password"></div>
+              <div class="hint">上の辞書に含まれるパスワードを入れると成功します</div>
+            </div>
+          </div>
+          <div class="control-row">
+            <span class="control-label">辞書リスト</span>
+            <div class="radio-group">
+              <label><input type="radio" name="dictType" value="common" checked> よく使われるパスワード（50件）</label>
+              <label><input type="radio" name="dictType" value="japanese"> 日本語由来パスワード（30件）</label>
+              <label><input type="radio" name="dictType" value="custom"> カスタム辞書</label>
+              <textarea class="custom-dict" id="customDict" placeholder="改行区切りで入力..."></textarea>
+            </div>
+          </div>
+          <div class="control-row">
+            <span class="control-label">試行速度</span>
+            <div class="speed-wrap">
+              <input type="range" id="speedSlider" min="1" max="20" value="5">
+              <span class="speed-value" id="speedValue">5 回/秒</span>
+            </div>
+          </div>
+          <div class="control-row">
+            <div class="btn-group">
+              <button class="demo-btn danger" id="startBtn"><i class="ti ti-player-play"></i> 攻撃開始</button>
+              <button class="demo-btn secondary" id="pauseBtn" disabled><i class="ti ti-player-pause"></i> 一時停止</button>
+              <button class="demo-btn secondary" id="resetBtn"><i class="ti ti-refresh"></i> リセット</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-panel">
+          <div class="stat-card"><div class="stat-label">試行回数</div><div class="stat-value"><span id="statAttempts">0</span> / <span id="statTotal">50</span></div></div>
+          <div class="stat-card"><div class="stat-label">経過時間</div><div class="stat-value" id="statTime">0.0s</div></div>
+          <div class="stat-card"><div class="stat-label">ヒット率</div><div class="stat-value" id="statHit">0%</div></div>
+        </div>
+
+        <div class="current-attempt">
+          <div class="current-label">現在試行中</div>
+          <div class="current-value" id="currentPw">-</div>
+        </div>
+
+        <div class="dict-list" id="dictList"></div>
+
+        <div class="result-panel" id="resultPanel">
+          <div class="result-title" id="resultTitle"></div>
+          <div id="resultBody"></div>
+        </div>
+
+        <div class="countermeasure-panel">
+          <div class="countermeasure-title"><i class="ti ti-shield-check"></i> この攻撃を防ぐには</div>
+          <div class="countermeasure-list">
+            <div class="countermeasure-item"><span class="bad">❌</span> 辞書に載る単語をそのまま使用</div>
+            <div class="countermeasure-item"><span class="good">✅</span> ランダムな文字列（パスワードマネージャー推奨）</div>
+            <div class="countermeasure-item"><span class="good">✅</span> アカウントロックアウト（N回失敗でロック）</div>
+            <div class="countermeasure-item"><span class="good">✅</span> 多要素認証（MFA）</div>
+            <div class="countermeasure-item"><span class="good">✅</span> パスワードのハッシュ化（bcrypt等）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DICT_COMMON = [
+      "123456","password","123456789","qwerty","abc123",
+      "monkey","1234567","letmein","trustno1","dragon",
+      "baseball","iloveyou","master","sunshine","ashley",
+      "bailey","passw0rd","shadow","123123","654321",
+      "superman","qazwsx","michael","football","password1",
+      "1q2w3e4r","qwertyuiop","123321","mustang","access",
+      "admin","login","hello","welcome","ninja",
+      "pass","1234","5678","0000","1111",
+      "2000","2023","2024","1999","test",
+      "guest","root","toor","default","system"
+    ];
+    const DICT_JAPANESE = [
+      "sakura","yamato","fujisan","katana","samurai",
+      "ninja123","tokyo2024","osaka123","kyoto","hokkaido",
+      "tanaka","suzuki","sato","watanabe","ito",
+      "ichiban","nihon","japan","anime","manga",
+      "ramen123","sushi","tempura","matcha","kawaii",
+      "naruto","goku","luffy","pikachu","doraemon"
+    ];
+
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      updateThemeIcon();
+    }
+    function updateThemeIcon() {
+      const btn = document.getElementById('themeToggle');
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (btn) btn.innerHTML = isDark ? '<i class="ti ti-sun"></i>' : '<i class="ti ti-moon"></i>';
+    }
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.toggleAttribute('data-theme', !isDark);
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+      updateThemeIcon();
+    }
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    document.getElementById('riskBar').innerHTML = [1,2,3,4,5].map(i => `<div class="risk-dot ${i <= 3 ? 'r3' : ''}"></div>`).join('');
+    initTheme();
+
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const targetPw = document.getElementById('targetPw');
+    const dictList = document.getElementById('dictList');
+    const customDict = document.getElementById('customDict');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedValue = document.getElementById('speedValue');
+    const resultPanel = document.getElementById('resultPanel');
+
+    let attackInterval = null;
+    let currentIdx = 0;
+    let startTime = 0;
+    let dictionary = [];
+    let found = false;
+    let paused = false;
+
+    document.querySelectorAll('input[name="dictType"]').forEach(r => {
+      r.addEventListener('change', () => {
+        customDict.classList.toggle('show', r.value === 'custom');
+        resetAttack();
+      });
+    });
+
+    speedSlider.addEventListener('input', () => {
+      speedValue.textContent = speedSlider.value + ' 回/秒';
+    });
+
+    function getDict() {
+      const type = document.querySelector('input[name="dictType"]:checked').value;
+      if (type === 'common') return [...DICT_COMMON];
+      if (type === 'japanese') return [...DICT_JAPANESE];
+      return customDict.value.split('\n').map(s => s.trim()).filter(s => s);
+    }
+
+    function renderDictList() {
+      dictionary = getDict();
+      document.getElementById('statTotal').textContent = dictionary.length;
+      dictList.innerHTML = dictionary.map((pw, i) =>
+        `<div class="dict-item pending" id="dict-${i}">
+          <span class="dict-num">#${String(i+1).padStart(3,'0')}</span>
+          <span class="dict-pw">${pw}</span>
+          <span class="dict-status">（未試行）</span>
+        </div>`
+      ).join('');
+    }
+
+    function updateStats() {
+      const elapsed = (Date.now() - startTime) / 1000;
+      document.getElementById('statAttempts').textContent = currentIdx;
+      document.getElementById('statTime').textContent = elapsed.toFixed(1) + 's';
+      document.getElementById('statHit').textContent = found ? '100%' : '0%';
+    }
+
+    function startAttack() {
+      if (paused) {
+        paused = false;
+        startTime = Date.now() - (currentIdx * 1000 / parseInt(speedSlider.value));
+      } else {
+        renderDictList();
+        currentIdx = 0;
+        found = false;
+        startTime = Date.now();
+        resultPanel.classList.remove('show', 'success', 'fail');
+      }
+      if (dictionary.length === 0) { alert('辞書が空です'); return; }
+
+      startBtn.disabled = true;
+      pauseBtn.disabled = false;
+
+      const speed = parseInt(speedSlider.value);
+      attackInterval = setInterval(() => {
+        if (currentIdx >= dictionary.length || found) {
+          clearInterval(attackInterval);
+          attackInterval = null;
+          onComplete();
+          return;
+        }
+        tryPassword(currentIdx);
+        currentIdx++;
+        updateStats();
+      }, 1000 / speed);
+    }
+
+    function tryPassword(idx) {
+      const prev = document.querySelector('.dict-item.trying');
+      if (prev) { prev.classList.remove('trying'); prev.classList.add('failed'); prev.querySelector('.dict-status').textContent = '❌ 不一致'; }
+
+      const el = document.getElementById(`dict-${idx}`);
+      const pw = dictionary[idx];
+      document.getElementById('currentPw').textContent = pw;
+
+      el.classList.remove('pending');
+      el.classList.add('trying');
+      el.querySelector('.dict-status').textContent = '⏳ 試行中';
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      if (pw === targetPw.value) {
+        found = true;
+        el.classList.remove('trying');
+        el.classList.add('success');
+        el.querySelector('.dict-status').textContent = '✅ 一致！';
+      }
+    }
+
+    function onComplete() {
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      const target = targetPw.value;
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+
+      if (found) {
+        const idx = dictionary.indexOf(target);
+        resultPanel.classList.add('show', 'success');
+        document.getElementById('resultTitle').className = 'result-title success';
+        document.getElementById('resultTitle').textContent = '🎉 クラック成功！';
+        const bruteSpace = Math.pow(36, target.length);
+        const bruteTime = bruteSpace / 1000000000;
+        let bruteStr = bruteTime < 1 ? '1秒未満' : bruteTime < 60 ? Math.ceil(bruteTime) + '秒' : bruteTime < 3600 ? Math.ceil(bruteTime/60) + '分' : bruteTime < 86400 ? Math.ceil(bruteTime/3600) + '時間' : Math.ceil(bruteTime/86400) + '日';
+        document.getElementById('resultBody').innerHTML = `
+          <p>「<strong>${target}</strong>」を総当たりで解読すると...</p>
+          <table class="compare-table">
+            <tr><th>方式</th><th>試行数</th><th>所要時間</th></tr>
+            <tr><td>総当たり（小文字+数字）</td><td class="compare-slow">${bruteSpace.toLocaleString()}通り</td><td class="compare-slow">約${bruteStr}</td></tr>
+            <tr><td>辞書攻撃</td><td class="compare-fast">${dictionary.length}件中${idx+1}番目</td><td class="compare-fast">${elapsed}秒で発見</td></tr>
+          </table>`;
+      } else {
+        resultPanel.classList.add('show', 'fail');
+        document.getElementById('resultTitle').className = 'result-title';
+        document.getElementById('resultTitle').textContent = '辞書に含まれていません';
+        document.getElementById('resultBody').innerHTML = '<p>より強力なパスワードポリシーが有効です。</p><p>ランダムな文字列やパスフレーズの使用を推奨します。</p>';
+        const last = document.querySelector('.dict-item.trying');
+        if (last) { last.classList.remove('trying'); last.classList.add('failed'); last.querySelector('.dict-status').textContent = '❌ 不一致'; }
+      }
+    }
+
+    function pauseAttack() {
+      if (attackInterval) {
+        clearInterval(attackInterval);
+        attackInterval = null;
+        paused = true;
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+      }
+    }
+
+    function resetAttack() {
+      if (attackInterval) clearInterval(attackInterval);
+      attackInterval = null;
+      currentIdx = 0;
+      found = false;
+      paused = false;
+      document.getElementById('currentPw').textContent = '-';
+      document.getElementById('statAttempts').textContent = '0';
+      document.getElementById('statTime').textContent = '0.0s';
+      document.getElementById('statHit').textContent = '0%';
+      resultPanel.classList.remove('show', 'success', 'fail');
+      renderDictList();
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+    }
+
+    startBtn.addEventListener('click', startAttack);
+    pauseBtn.addEventListener('click', pauseAttack);
+    resetBtn.addEventListener('click', resetAttack);
+
+    renderDictList();
+  </script>
+</body>
+</html>
