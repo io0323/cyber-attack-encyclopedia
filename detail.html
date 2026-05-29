@@ -3,32 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ネットワークスキャン - サイバー攻撃手法百科事典</title>
+  <title>詳細 - サイバー攻撃手法百科事典</title>
   <link rel="stylesheet" href="src/styles/main.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   <style>
-    .demo-controls { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
-    .control-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-    .control-label { font-size: 13px; color: var(--color-text-secondary); min-width: 100px; }
-    .range-wrap { display: flex; align-items: center; gap: 0.5rem; flex: 1; font-family: monospace; font-size: 13px; }
-    .range-wrap input[type="range"] { flex: 1; max-width: 100px; }
-    .range-value { min-width: 70px; }
-    .radio-group { display: flex; gap: 1rem; flex-wrap: wrap; }
-    .radio-group label { display: flex; align-items: center; gap: 0.25rem; font-size: 13px; cursor: pointer; }
-    .btn-group { display: flex; gap: 0.5rem; }
-    .demo-btn.secondary { background: var(--color-bg-secondary); color: var(--color-text-primary); border: 1px solid var(--color-border); }
-    .network-map { display: flex; justify-content: center; margin-bottom: 1rem; }
-    .network-map svg { background: var(--color-bg-secondary); border-radius: var(--radius-sm); }
-    .host-dot { fill: var(--color-bg-tertiary); transition: fill 0.1s; }
-    .host-dot.scanning { fill: #eab308; }
-    .host-dot.active { fill: #22c55e; }
-    .host-dot.inactive { fill: #374151; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-    .host-dot.scanning { animation: pulse 0.3s ease-in-out; }
-    .demo-log { max-height: 200px; }
-    .log-success { color: #22c55e; }
-    .log-fail { color: #6b7280; }
-    .log-summary { color: #60a5fa; }
+    .demo-controls{display:flex;flex-direction:column;gap:1rem;margin-bottom:1.5rem}
+    .control-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+    .control-label{font-size:13px;color:var(--color-text-secondary);min-width:80px}
+    .btn-group{display:flex;gap:.5rem}
+    .demo-btn.secondary{background:var(--color-bg-secondary);color:var(--color-text-primary);border:1px solid var(--color-border)}
+    .demo-btn.danger{background:var(--risk-5)}
+    .demo-log{max-height:180px;background:#0d1117;color:#8b949e;font-size:11px}
+    .log-success{color:#3fb950}.log-fail{color:#6e7681}.log-info{color:#58a6ff}
+    .demo-svg{width:100%;height:200px;background:var(--color-bg-secondary);border-radius:var(--radius-sm)}
+    .input-sm{padding:6px 10px;border:1px solid var(--color-border);border-radius:var(--radius-sm);background:var(--color-bg-primary);color:var(--color-text-primary);font-family:monospace;font-size:13px}
+    .preset-btns{display:flex;gap:.5rem;flex-wrap:wrap}
+    .preset-btn{padding:4px 10px;font-size:11px;background:var(--color-bg-tertiary);border:1px solid var(--color-border);border-radius:var(--radius-sm);cursor:pointer;color:var(--color-text-primary)}
+    .file-tree{font-family:monospace;font-size:13px;background:var(--color-bg-secondary);padding:1rem;border-radius:var(--radius-sm)}
+    .file-item{padding:4px 0;display:flex;align-items:center;gap:.5rem}
+    .file-item.infected{color:var(--risk-5)}
+    .file-item.encrypted{color:var(--risk-4)}
+    .fake-form{background:var(--color-bg-primary);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:1.5rem;max-width:320px}
+    .fake-form-title{font-weight:600;margin-bottom:1rem;text-align:center}
+    .fake-input{width:100%;padding:10px;border:1px solid var(--color-border);border-radius:var(--radius-sm);margin-bottom:.75rem;background:var(--color-bg-primary);color:var(--color-text-primary)}
+    .fake-submit{width:100%;padding:10px;background:var(--color-accent);border:none;border-radius:var(--radius-sm);color:#fff;cursor:pointer}
+    .alert-box{padding:1rem;border-radius:var(--radius-sm);margin-top:1rem;display:none}
+    .alert-box.show{display:block}
+    .alert-box.danger{background:var(--cat-malware-bg);color:var(--cat-malware-text)}
+    .alert-box.success{background:var(--cat-web-bg);color:var(--cat-web-text)}
+    .stat-row{display:flex;gap:1rem;margin-bottom:1rem}
+    .stat-card{flex:1;background:var(--color-bg-primary);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:.75rem;text-align:center}
+    .stat-label{font-size:11px;color:var(--color-text-tertiary)}
+    .stat-value{font-size:1.1rem;font-weight:600;font-family:monospace}
+    .timeline{display:flex;flex-direction:column;gap:.5rem}
+    .timeline-item{display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:var(--radius-sm);background:var(--color-bg-primary)}
+    .timeline-item.active{background:var(--cat-malware-bg);color:var(--cat-malware-text)}
+    .timeline-dot{width:12px;height:12px;border-radius:50%;background:var(--color-border)}
+    .timeline-item.active .timeline-dot{background:var(--risk-5)}
+    .process-list{font-family:monospace;font-size:12px}
+    .process-item{padding:4px 8px;border-bottom:1px solid var(--color-border)}
+    .process-item.hidden{opacity:.3;text-decoration:line-through}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .scanning{animation:pulse .5s ease-in-out infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    .blinking{animation:blink .3s ease-in-out infinite}
   </style>
 </head>
 <body>
@@ -37,7 +55,6 @@
       <a href="index.html" class="nav-btn"><i class="ti ti-arrow-left"></i> 一覧に戻る</a>
       <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替"><i class="ti ti-moon"></i></button>
     </header>
-
     <div class="detail-header">
       <div>
         <h1 class="detail-title" id="attackName"></h1>
@@ -46,22 +63,16 @@
           <div class="risk-bar" id="riskBar"></div>
         </div>
       </div>
-      <div class="detail-nav">
-        <a href="detail.html?id=39" class="nav-btn"><i class="ti ti-chevron-left"></i> No.39</a>
-        <a href="detail-2.html" class="nav-btn">No.02 <i class="ti ti-chevron-right"></i></a>
-      </div>
+      <div class="detail-nav" id="detailNav"></div>
     </div>
-
     <div class="detail-section">
       <div class="detail-label">仕掛け方</div>
       <div class="detail-value" id="mechanism"></div>
     </div>
-
     <div class="detail-section">
       <div class="detail-label">攻撃フロー</div>
       <div class="flow-list" id="flow"></div>
     </div>
-
     <div class="detail-grid">
       <div class="detail-section">
         <div class="detail-label">攻撃対象</div>
@@ -72,261 +83,537 @@
         <div class="detail-value" id="layer"></div>
       </div>
     </div>
-
     <div class="detail-section">
       <div class="detail-label">対策</div>
       <div class="detail-value" id="countermeasure"></div>
     </div>
-
     <div class="detail-section">
       <div class="detail-label">実例</div>
       <div class="example-box" id="example"></div>
     </div>
-
     <div class="demo-section">
-      <div class="demo-title"><i class="ti ti-radar"></i> ネットワークスキャン シミュレーター</div>
-      <div class="demo-container">
-        <div class="demo-controls">
-          <div class="control-row">
-            <span class="control-label">ターゲットIP</span>
-            <div class="range-wrap">
-              <span>192.168.1.</span>
-              <input type="range" id="rangeStart" min="1" max="253" value="1">
-              <span>〜</span>
-              <input type="range" id="rangeEnd" min="2" max="254" value="254">
-              <span class="range-value" id="rangeDisplay">1 - 254</span>
-            </div>
-          </div>
-          <div class="control-row">
-            <span class="control-label">スキャン方式</span>
-            <div class="radio-group">
-              <label><input type="radio" name="scanType" value="icmp" checked> ICMP Ping</label>
-              <label><input type="radio" name="scanType" value="tcp"> TCP SYN</label>
-              <label><input type="radio" name="scanType" value="udp"> UDP Scan</label>
-            </div>
-          </div>
-          <div class="control-row">
-            <div class="btn-group">
-              <button class="demo-btn" id="startBtn"><i class="ti ti-player-play"></i> スキャン開始</button>
-              <button class="demo-btn secondary" id="stopBtn" disabled><i class="ti ti-player-stop"></i> 中断</button>
-            </div>
-          </div>
-        </div>
-        <div class="network-map">
-          <svg id="networkSvg" width="320" height="320" viewBox="0 0 320 320"></svg>
-        </div>
-        <div class="demo-log" id="logArea"></div>
-      </div>
+      <div class="demo-title" id="demoTitle"><i class="ti ti-cpu"></i> シミュレーター</div>
+      <div class="demo-container" id="demoContainer"></div>
     </div>
   </div>
-
   <script src="./src/data/attacks.js"></script>
   <script>
     const attacks = window.attacks;
     const categories = {
-      network: { label: 'ネットワーク' },
-      malware: { label: 'マルウェア' },
-      social: { label: 'ソーシャル' },
-      web: { label: 'Web' },
-      ddos: { label: 'DoS/DDoS' },
-      intercept: { label: '傍受' },
-      misc: { label: 'その他' }
+      network:{label:'ネットワーク',icon:'ti-network'},
+      malware:{label:'マルウェア',icon:'ti-bug'},
+      social:{label:'ソーシャル',icon:'ti-users'},
+      web:{label:'Web',icon:'ti-world'},
+      ddos:{label:'DoS/DDoS',icon:'ti-bolt'},
+      intercept:{label:'傍受',icon:'ti-ear'},
+      misc:{label:'その他',icon:'ti-dots'}
     };
 
-    function initTheme() {
-      const saved = localStorage.getItem('theme');
-      if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    function initTheme(){
+      if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');
       updateThemeIcon();
     }
-
-    function updateThemeIcon() {
-      const btn = document.getElementById('themeToggle');
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      if (btn) btn.innerHTML = isDark ? '<i class="ti ti-sun"></i>' : '<i class="ti ti-moon"></i>';
+    function updateThemeIcon(){
+      const btn=document.getElementById('themeToggle');
+      const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+      if(btn)btn.innerHTML=isDark?'<i class="ti ti-sun"></i>':'<i class="ti ti-moon"></i>';
     }
-
-    function toggleTheme() {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      if (isDark) {
-        document.documentElement.removeAttribute('data-theme');
-        localStorage.setItem('theme', 'light');
-      } else {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem('theme', 'dark');
-      }
+    function toggleTheme(){
+      const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+      document.documentElement.toggleAttribute('data-theme',!isDark);
+      localStorage.setItem('theme',isDark?'light':'dark');
       updateThemeIcon();
     }
-
-    const params = new URLSearchParams(window.location.search);
-    const attackId = parseInt(params.get('id')) || 1;
-    const attack = attacks.find(a => a.id === attackId) || attacks[0];
-
-    document.title = `${attack.name} - サイバー攻撃手法百科事典`;
-    document.getElementById('attackName').textContent = `No.${String(attack.id).padStart(2,'0')} ${attack.name}`;
-
-    const badge = document.getElementById('attackBadge');
-    badge.textContent = categories[attack.category]?.label || attack.category;
-    badge.className = `badge badge-${attack.category}`;
-
-    const riskBar = document.getElementById('riskBar');
-    riskBar.innerHTML = [1,2,3,4,5].map(i =>
-      `<div class="risk-dot ${i <= attack.risk ? 'r' + attack.risk : ''}"></div>`
-    ).join('');
-
-    document.getElementById('mechanism').textContent = attack.mechanism;
-    document.getElementById('target').textContent = attack.target;
-    document.getElementById('layer').textContent = attack.layer;
-    document.getElementById('countermeasure').textContent = attack.countermeasure;
-    document.getElementById('example').textContent = attack.example;
-
-    const flowEl = document.getElementById('flow');
-    flowEl.innerHTML = attack.flow.map((step, i) =>
-      `<span class="flow-step">${step}</span>${i < attack.flow.length - 1 ? '<i class="ti ti-arrow-right flow-arrow"></i>' : ''}`
-    ).join('');
-
-    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    document.getElementById('themeToggle').addEventListener('click',toggleTheme);
     initTheme();
 
-    const svg = document.getElementById('networkSvg');
-    const logArea = document.getElementById('logArea');
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const rangeStart = document.getElementById('rangeStart');
-    const rangeEnd = document.getElementById('rangeEnd');
-    const rangeDisplay = document.getElementById('rangeDisplay');
+    const params=new URLSearchParams(location.search);
+    const id=parseInt(params.get('id'))||1;
+    const attack=attacks.find(a=>a.id===id);
+    if(!attack)location.href='index.html';
 
-    let activeHosts = new Set();
-    let dots = [];
-    let scanInterval = null;
+    const prev=attacks.find(a=>a.id===id-1);
+    const next=attacks.find(a=>a.id===id+1);
 
-    function initNetwork() {
-      svg.innerHTML = '';
-      dots = [];
-      activeHosts.clear();
-      for (let i = 0; i < 256; i++) {
-        if (Math.random() < 0.2) activeHosts.add(i);
+    document.title=`${attack.name} - サイバー攻撃手法百科事典`;
+    document.getElementById('attackName').textContent=`No.${String(attack.id).padStart(2,'0')} ${attack.name}`;
+    const badge=document.getElementById('attackBadge');
+    badge.textContent=categories[attack.category]?.label||attack.category;
+    badge.className=`badge badge-${attack.category}`;
+    document.getElementById('riskBar').innerHTML=[1,2,3,4,5].map(i=>`<div class="risk-dot ${i<=attack.risk?'r'+attack.risk:''}"></div>`).join('');
+    document.getElementById('mechanism').textContent=attack.mechanism;
+    document.getElementById('target').textContent=attack.target;
+    document.getElementById('layer').textContent=attack.layer;
+    document.getElementById('countermeasure').textContent=attack.countermeasure;
+    document.getElementById('example').textContent=attack.example;
+    document.getElementById('flow').innerHTML=attack.flow.map((s,i)=>`<span class="flow-step">${s}</span>${i<attack.flow.length-1?'<i class="ti ti-arrow-right flow-arrow"></i>':''}`).join('');
+
+    const navEl=document.getElementById('detailNav');
+    navEl.innerHTML=(prev?`<a href="detail.html?id=${prev.id}" class="nav-btn"><i class="ti ti-chevron-left"></i> No.${String(prev.id).padStart(2,'0')}</a>`:'')+
+      (next?`<a href="detail.html?id=${next.id}" class="nav-btn">No.${String(next.id).padStart(2,'0')} <i class="ti ti-chevron-right"></i></a>`:'');
+
+    const demoContainer=document.getElementById('demoContainer');
+    const demoTitle=document.getElementById('demoTitle');
+
+    function log(el,text,cls){const d=document.createElement('div');d.className='demo-log-line'+(cls?' '+cls:'');d.textContent=text;el.appendChild(d);el.scrollTop=el.scrollHeight;}
+
+    // ===== NETWORK DEMO =====
+    function renderDemo_network(a,c){
+      demoTitle.innerHTML='<i class="ti ti-network"></i> パケット送受信シミュレーター';
+      c.innerHTML=`<svg class="demo-svg" id="netSvg" viewBox="0 0 400 150"></svg>
+        <div class="stat-row"><div class="stat-card"><div class="stat-label">送信数</div><div class="stat-value" id="pktCount">0</div></div>
+        <div class="stat-card"><div class="stat-label">応答数</div><div class="stat-value" id="resCount">0</div></div></div>
+        <div class="btn-group"><button class="demo-btn" id="netStart"><i class="ti ti-player-play"></i> 開始</button>
+        <button class="demo-btn secondary" id="netStop" disabled><i class="ti ti-player-stop"></i> 停止</button>
+        <button class="demo-btn secondary" id="netReset"><i class="ti ti-refresh"></i> リセット</button></div>
+        <div class="demo-log" id="netLog" style="margin-top:1rem"></div>`;
+      const svg=document.getElementById('netSvg');
+      svg.innerHTML=`<text x="30" y="80" font-size="28">💻</text><text x="20" y="110" font-size="10" fill="var(--color-text-secondary)">攻撃者</text>
+        <text x="340" y="80" font-size="28">🖥</text><text x="330" y="110" font-size="10" fill="var(--color-text-secondary)">ターゲット</text>
+        <g id="packets"></g>`;
+      let interval=null,sent=0,recv=0;
+      const pktG=document.getElementById('packets'),logEl=document.getElementById('netLog');
+      const startBtn=document.getElementById('netStart'),stopBtn=document.getElementById('netStop'),resetBtn=document.getElementById('netReset');
+      function sendPacket(){
+        sent++;document.getElementById('pktCount').textContent=sent;
+        const pkt=document.createElementNS('http://www.w3.org/2000/svg','circle');
+        pkt.setAttribute('r','6');pkt.setAttribute('fill','#3b82f6');pkt.setAttribute('cy','75');
+        pkt.innerHTML=`<animate attributeName="cx" from="70" to="330" dur="0.6s" fill="freeze"/>`;
+        pktG.appendChild(pkt);
+        log(logEl,`→ [${sent}] ${a.name} パケット送信...`,'log-info');
+        setTimeout(()=>{
+          pkt.remove();
+          if(Math.random()>0.2){
+            recv++;document.getElementById('resCount').textContent=recv;
+            const res=document.createElementNS('http://www.w3.org/2000/svg','circle');
+            res.setAttribute('r','5');res.setAttribute('fill','#ef4444');res.setAttribute('cy','75');
+            res.innerHTML=`<animate attributeName="cx" from="330" to="70" dur="0.4s" fill="freeze"/>`;
+            pktG.appendChild(res);
+            log(logEl,`← [${sent}] 応答受信`,'log-success');
+            setTimeout(()=>res.remove(),400);
+          }else{log(logEl,`✗ [${sent}] タイムアウト`,'log-fail');}
+        },600);
       }
-      for (let row = 0; row < 16; row++) {
-        for (let col = 0; col < 16; col++) {
-          const idx = row * 16 + col;
-          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          circle.setAttribute('cx', col * 20 + 10);
-          circle.setAttribute('cy', row * 20 + 10);
-          circle.setAttribute('r', 6);
-          circle.classList.add('host-dot');
-          svg.appendChild(circle);
-          dots.push(circle);
-        }
+      startBtn.onclick=()=>{startBtn.disabled=true;stopBtn.disabled=false;interval=setInterval(sendPacket,800);};
+      stopBtn.onclick=()=>{clearInterval(interval);interval=null;startBtn.disabled=false;stopBtn.disabled=true;};
+      resetBtn.onclick=()=>{stopBtn.onclick();sent=recv=0;document.getElementById('pktCount').textContent='0';document.getElementById('resCount').textContent='0';logEl.innerHTML='';pktG.innerHTML='';};
+    }
+
+    // ===== MALWARE DEMO =====
+    function renderDemo_malware(a,c){
+      demoTitle.innerHTML='<i class="ti ti-bug"></i> ファイルシステム感染シミュレーター';
+      const files=[{n:'📁 Documents/',f:0},{n:'📄 report.docx',f:1},{n:'📄 budget.xlsx',f:1},{n:'📁 Photos/',f:0},{n:'🖼 vacation.jpg',f:1},{n:'🖼 family.png',f:1},{n:'📁 Desktop/',f:0},{n:'📄 memo.txt',f:1},{n:'📄 passwords.txt',f:1,t:1},{n:'📁 Downloads/',f:0},{n:'📄 installer.exe',f:1,s:1}];
+      c.innerHTML=`<div class="file-tree" id="fileTree">${files.map((f,i)=>`<div class="file-item" data-idx="${i}" data-file="${f.f}">${f.n}${f.t?' ← 狙われやすい':''}${f.s?' ← 感染経路':''}</div>`).join('')}</div>
+        <div class="btn-group" style="margin-top:1rem"><button class="demo-btn danger" id="infectBtn"><i class="ti ti-virus"></i> 感染開始</button>
+        <button class="demo-btn secondary" id="resetMal"><i class="ti ti-refresh"></i> リセット</button></div>
+        <div class="alert-box danger" id="malAlert"></div>`;
+      const tree=document.getElementById('fileTree'),alertBox=document.getElementById('malAlert');
+      const isRansom=a.id===8,isKeylog=a.id===19,isRootkit=a.id===34;
+      if(isKeylog){
+        c.innerHTML+=`<div style="margin-top:1rem"><input class="input-sm" id="keyInput" placeholder="ここに入力するとキーログされます..." style="width:100%"></div>
+          <div class="demo-log" id="keyLog" style="margin-top:.5rem"></div>`;
+        document.getElementById('keyInput').addEventListener('keydown',e=>{if(e.key.length===1)log(document.getElementById('keyLog'),`KEY: ${e.key}`,'log-fail');});
+      }
+      if(isRootkit){
+        c.innerHTML+=`<div class="process-list" id="procList" style="margin-top:1rem">
+          <div class="process-item">chrome.exe - Google Chrome</div>
+          <div class="process-item">explorer.exe - Windows Explorer</div>
+          <div class="process-item" data-evil="1">svchost_evil.exe - 悪意あるプロセス</div>
+          <div class="process-item">notepad.exe - メモ帳</div>
+          <div class="process-item" data-evil="1">keylogger.dll - キーロガー</div></div>`;
+      }
+      document.getElementById('infectBtn').onclick=()=>{
+        const items=tree.querySelectorAll('.file-item[data-file="1"]');
+        let i=0;
+        const iv=setInterval(()=>{
+          if(i>=items.length){
+            clearInterval(iv);
+            if(isRansom){alertBox.innerHTML='<strong>⚠ FILES ENCRYPTED</strong><br>Send 0.5 BTC to: 1A2b3C4d5E6f...';alertBox.classList.add('show');}
+            if(isRootkit){document.querySelectorAll('.process-item[data-evil]').forEach(p=>{p.classList.add('hidden');p.textContent+=' [隠蔽済]';});}
+            return;
+          }
+          const el=items[i];
+          el.classList.add(isRansom?'encrypted':'infected');
+          el.innerHTML=(isRansom?'🔒':'💀')+el.textContent.slice(1);
+          i++;
+        },300);
+      };
+      document.getElementById('resetMal').onclick=()=>location.reload();
+    }
+
+    // ===== SOCIAL DEMO =====
+    function renderDemo_social(a,c){
+      demoTitle.innerHTML='<i class="ti ti-users"></i> ソーシャルエンジニアリング体験';
+      if(a.id===9){
+        c.innerHTML=`<div class="fake-form" style="border-color:var(--cat-social-text)">
+          <div class="fake-form-title" style="color:var(--cat-social-text)">🏦 〇〇銀行 ログイン</div>
+          <input class="fake-input" id="phishId" placeholder="ユーザーID"><input class="fake-input" type="password" id="phishPw" placeholder="パスワード">
+          <button class="fake-submit" id="phishBtn" style="background:var(--cat-social-text)">ログイン</button>
+          <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:.5rem">※セキュリティ確認のため再入力をお願いします</div></div>
+          <div class="alert-box danger" id="phishAlert"></div>`;
+        document.getElementById('phishBtn').onclick=()=>{
+          const uid=document.getElementById('phishId').value,pw=document.getElementById('phishPw').value;
+          if(uid||pw){const al=document.getElementById('phishAlert');al.innerHTML=`<strong>⚠ あなたの情報が盗まれました！</strong><br>ID: ${uid}<br>PW: ${'*'.repeat(pw.length)}<br>→ 攻撃者サーバー (192.168.x.x) へ送信完了`;al.classList.add('show');}
+        };
+      }else if(a.id===10){
+        c.innerHTML=`<div class="fake-form"><div class="fake-form-title">📧 重要: 至急ご確認ください</div>
+          <div style="font-size:13px;margin-bottom:1rem">〇〇株式会社 経理部 様<br><br>添付の請求書をご確認ください。<br>期限: 本日中</div>
+          <button class="demo-btn danger" id="openAttach"><i class="ti ti-paperclip"></i> 添付ファイルを開く (invoice.exe)</button></div>
+          <div class="alert-box danger" id="aptAlert"></div>`;
+        document.getElementById('openAttach').onclick=()=>{
+          const al=document.getElementById('aptAlert');al.innerHTML='<strong>💀 マルウェア実行中...</strong><br>バックドア設置完了<br>C2サーバーへ接続中...';al.classList.add('show');
+        };
+      }else{
+        c.innerHTML=`<div style="background:var(--color-bg-primary);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:1rem;max-height:200px;overflow:hidden" id="inbox"></div>
+          <button class="demo-btn" id="spamBtn" style="margin-top:1rem"><i class="ti ti-mail"></i> スパム受信開始</button>`;
+        const inbox=document.getElementById('inbox');
+        const spams=['💰 当選おめでとう！100万円獲得！','⚠ アカウント停止のお知らせ','🎁 無料プレゼント当選！','💳 クレジットカード確認','📦 配送状況の確認'];
+        document.getElementById('spamBtn').onclick=()=>{
+          let i=0;const iv=setInterval(()=>{
+            if(i>20){clearInterval(iv);return;}
+            const d=document.createElement('div');d.style.cssText='padding:8px;border-bottom:1px solid var(--color-border);font-size:13px';
+            d.textContent=spams[Math.floor(Math.random()*spams.length)];inbox.prepend(d);i++;
+          },200);
+        };
       }
     }
 
-    function updateRangeDisplay() {
-      let start = parseInt(rangeStart.value);
-      let end = parseInt(rangeEnd.value);
-      if (start > end) { const t = start; start = end; end = t; }
-      rangeDisplay.textContent = `${start} - ${end}`;
-    }
-
-    rangeStart.addEventListener('input', updateRangeDisplay);
-    rangeEnd.addEventListener('input', updateRangeDisplay);
-
-    function formatTime(ms) {
-      const s = Math.floor(ms / 1000);
-      const m = ms % 1000;
-      return `${String(Math.floor(s / 60)).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}.${String(m).padStart(3,'0')}`;
-    }
-
-    function log(text, cls) {
-      const line = document.createElement('div');
-      line.className = 'demo-log-line' + (cls ? ' ' + cls : '');
-      line.textContent = text;
-      logArea.appendChild(line);
-      logArea.scrollTop = logArea.scrollHeight;
-    }
-
-    function startScan() {
-      initNetwork();
-      logArea.innerHTML = '';
-
-      let start = parseInt(rangeStart.value);
-      let end = parseInt(rangeEnd.value);
-      if (start > end) { const t = start; start = end; end = t; }
-
-      const scanType = document.querySelector('input[name="scanType"]:checked').value;
-      const typeLabel = { icmp: 'ICMP Echo', tcp: 'TCP SYN', udp: 'UDP Probe' }[scanType];
-
-      let current = start;
-      let responded = 0;
-      const startTime = Date.now();
-
-      startBtn.disabled = true;
-      stopBtn.disabled = false;
-
-      log(`スキャン開始: 192.168.1.${start} - 192.168.1.${end} (${typeLabel})`);
-
-      scanInterval = setInterval(() => {
-        if (current > end) {
-          clearInterval(scanInterval);
-          scanInterval = null;
-          const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-          log('=============================', 'log-summary');
-          log(`スキャン完了: ${end - start + 1}ホスト中 ${responded}台が応答`, 'log-summary');
-          log(`所要時間: ${elapsed}秒`, 'log-summary');
-          log('=============================', 'log-summary');
-          startBtn.disabled = false;
-          stopBtn.disabled = true;
-          return;
-        }
-
-        const idx = current - 1;
-        const dot = dots[idx];
-        if (dot) {
-          dot.classList.remove('scanning');
-          dot.classList.add('scanning');
-        }
-
-        const isActive = activeHosts.has(idx);
-        const elapsed = Date.now() - startTime;
-        const ip = `192.168.1.${current}`;
-
-        if (isActive) {
-          const latency = Math.floor(Math.random() * 50) + 5;
-          log(`[${formatTime(elapsed)}] ${typeLabel} → ${ip} ... Reply ${latency}ms ✅`, 'log-success');
-          responded++;
-          setTimeout(() => {
-            if (dot) {
-              dot.classList.remove('scanning');
-              dot.classList.add('active');
-            }
-          }, 40);
-        } else {
-          log(`[${formatTime(elapsed)}] ${typeLabel} → ${ip} ... Timeout  ❌`, 'log-fail');
-          setTimeout(() => {
-            if (dot) {
-              dot.classList.remove('scanning');
-              dot.classList.add('inactive');
-            }
-          }, 40);
-        }
-
-        current++;
-      }, 50);
-    }
-
-    function stopScan() {
-      if (scanInterval) {
-        clearInterval(scanInterval);
-        scanInterval = null;
-        log('--- 中断しました ---', 'log-summary');
-        startBtn.disabled = false;
-        stopBtn.disabled = true;
+    // ===== WEB DEMO =====
+    function renderDemo_web(a,c){
+      demoTitle.innerHTML='<i class="ti ti-world"></i> Webアプリ攻撃シミュレーター';
+      if(a.id===31){
+        c.innerHTML=`<div class="fake-form"><div class="fake-form-title">🔐 管理者ログイン</div>
+          <input class="fake-input" id="sqliId" placeholder="ID"><input class="fake-input" id="sqliPw" placeholder="Password">
+          <div class="preset-btns" style="margin-bottom:.75rem">
+            <button class="preset-btn" data-v="admin">正常</button><button class="preset-btn" data-v="' OR '1'='1">' OR '1'='1</button>
+            <button class="preset-btn" data-v="admin'--">admin'--</button></div>
+          <button class="fake-submit" id="sqliBtn">ログイン</button></div>
+          <div class="demo-log" id="sqliLog" style="margin-top:1rem"></div>
+          <div class="alert-box" id="sqliAlert"></div>`;
+        document.querySelectorAll('.preset-btn').forEach(b=>b.onclick=()=>document.getElementById('sqliId').value=b.dataset.v);
+        document.getElementById('sqliBtn').onclick=()=>{
+          const uid=document.getElementById('sqliId').value,logEl=document.getElementById('sqliLog'),al=document.getElementById('sqliAlert');
+          logEl.innerHTML='';log(logEl,`SELECT * FROM users WHERE id='${uid}' AND pw='***'`,'log-info');
+          if(uid.includes("'")||uid.includes('--')){
+            log(logEl,'→ SQL構文が改変されました！','log-fail');log(logEl,'→ 全レコード返却','log-success');
+            al.className='alert-box success show';al.innerHTML='<strong>✅ 認証バイパス成功！</strong><br>管理者としてログイン';
+          }else{al.className='alert-box danger show';al.innerHTML='❌ ログイン失敗';}
+        };
+      }else if(a.id===30){
+        c.innerHTML=`<div class="fake-form"><div class="fake-form-title">💬 コメント投稿</div>
+          <textarea class="fake-input" id="xssInput" rows="3" placeholder="コメントを入力..."></textarea>
+          <div class="preset-btns" style="margin-bottom:.75rem">
+            <button class="preset-btn" data-v="良い記事ですね">正常</button>
+            <button class="preset-btn" data-v="<script>alert('XSS')</script>">script</button>
+            <button class="preset-btn" data-v="<img src=x onerror=alert(1)>">img onerror</button></div>
+          <button class="fake-submit" id="xssBtn">投稿</button></div>
+          <div id="xssResult" style="margin-top:1rem"></div>`;
+        document.querySelectorAll('.preset-btn').forEach(b=>b.onclick=()=>document.getElementById('xssInput').value=b.dataset.v);
+        document.getElementById('xssBtn').onclick=()=>{
+          const v=document.getElementById('xssInput').value,res=document.getElementById('xssResult');
+          if(v.includes('<script')||v.includes('onerror')){
+            res.innerHTML=`<div class="alert-box danger show"><strong>⚠ XSS攻撃コード検出！</strong><br>スクリプトが実行されます</div>
+              <div style="background:#1a1a1a;color:#fff;padding:1rem;border-radius:var(--radius-sm);margin-top:.5rem;text-align:center">
+              <div style="background:#fff;color:#000;padding:.5rem 1rem;border-radius:4px;display:inline-block">⚠ Alert: XSS</div></div>`;
+          }else{res.innerHTML=`<div style="padding:1rem;background:var(--color-bg-secondary);border-radius:var(--radius-sm)">投稿: ${v}</div>`;}
+        };
+      }else if(a.id===37){
+        c.innerHTML=`<div class="fake-form"><div class="fake-form-title">🖥 Ping診断ツール</div>
+          <input class="fake-input" id="cmdInput" placeholder="IPアドレス" value="192.168.1.1">
+          <div class="preset-btns" style="margin-bottom:.75rem">
+            <button class="preset-btn" data-v="192.168.1.1">正常</button>
+            <button class="preset-btn" data-v="192.168.1.1; cat /etc/passwd">; cat /etc/passwd</button>
+            <button class="preset-btn" data-v="192.168.1.1 && whoami">&& whoami</button></div>
+          <button class="fake-submit" id="cmdBtn">実行</button></div>
+          <div class="demo-log" id="cmdLog" style="margin-top:1rem;min-height:100px"></div>`;
+        document.querySelectorAll('.preset-btn').forEach(b=>b.onclick=()=>document.getElementById('cmdInput').value=b.dataset.v);
+        document.getElementById('cmdBtn').onclick=()=>{
+          const v=document.getElementById('cmdInput').value,logEl=document.getElementById('cmdLog');logEl.innerHTML='';
+          log(logEl,`> ping ${v.split(/[;&|]/)[0]}`,'log-info');log(logEl,'PING: 64 bytes from 192.168.1.1: time=12ms','log-success');
+          if(v.includes(';')||v.includes('&&')||v.includes('|')){
+            const cmd=v.split(/[;&|]+/)[1]?.trim();
+            log(logEl,`> ${cmd} ← 注入されたコマンド実行！`,'log-fail');
+            if(cmd?.includes('passwd'))log(logEl,'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin','log-fail');
+            else if(cmd?.includes('whoami'))log(logEl,'www-data','log-fail');
+          }
+        };
+      }else if(a.id===21){
+        c.innerHTML=`<div class="fake-form"><div class="fake-form-title">📂 ファイル取得</div>
+          <input class="fake-input" id="pathInput" placeholder="ファイル名" value="image.jpg">
+          <div class="preset-btns" style="margin-bottom:.75rem">
+            <button class="preset-btn" data-v="image.jpg">正常</button>
+            <button class="preset-btn" data-v="../config.php">../config.php</button>
+            <button class="preset-btn" data-v="../../etc/passwd">../../etc/passwd</button></div>
+          <button class="fake-submit" id="pathBtn">取得</button></div>
+          <div class="demo-log" id="pathLog" style="margin-top:1rem"></div>`;
+        document.querySelectorAll('.preset-btn').forEach(b=>b.onclick=()=>document.getElementById('pathInput').value=b.dataset.v);
+        document.getElementById('pathBtn').onclick=()=>{
+          const v=document.getElementById('pathInput').value,logEl=document.getElementById('pathLog');logEl.innerHTML='';
+          log(logEl,`リクエスト: /files/${v}`,'log-info');
+          if(v.includes('..')){log(logEl,'⚠ ディレクトリトラバーサル検出！','log-fail');
+            if(v.includes('passwd'))log(logEl,'root:x:0:0:root:/root:/bin/bash','log-fail');
+            else if(v.includes('config'))log(logEl,'DB_PASS=secret123','log-fail');
+          }else{log(logEl,'200 OK - ファイル取得成功','log-success');}
+        };
+      }else if(a.id===38){
+        c.innerHTML=`<div class="fake-form"><div class="fake-form-title">💸 送金 (ログイン済: tanaka)</div>
+          <input class="fake-input" id="csrfTo" placeholder="送金先" value="suzuki"><input class="fake-input" id="csrfAmt" placeholder="金額" value="1000">
+          <button class="fake-submit" id="csrfBtn">送金</button></div>
+          <button class="demo-btn danger" id="csrfEvil" style="margin-top:1rem"><i class="ti ti-external-link"></i> 悪意あるページを開く</button>
+          <div class="alert-box danger" id="csrfAlert"></div>`;
+        document.getElementById('csrfBtn').onclick=()=>alert('送金完了: '+document.getElementById('csrfAmt').value+'円');
+        document.getElementById('csrfEvil').onclick=()=>{
+          const al=document.getElementById('csrfAlert');
+          al.innerHTML='<strong>⚠ CSRF攻撃発動！</strong><br>あなたの権限で自動送金リクエストが発行されました<br>送金先: attacker / 金額: 100,000円';
+          al.classList.add('show');
+        };
+      }else{
+        c.innerHTML=`<div class="timeline" id="webTimeline"></div><button class="demo-btn" id="webStep" style="margin-top:1rem"><i class="ti ti-player-track-next"></i> ステップ実行</button>`;
+        const steps=a.id===33?['1. 攻撃者がセッションID取得','2. 被害者にURLを送付','3. 被害者がログイン','4. 攻撃者がセッション共有']:['1. ECサイトに侵入','2. 決済フォームにスクリプト注入','3. ユーザーがカード情報入力','4. 情報が攻撃者サーバーへ送信'];
+        document.getElementById('webTimeline').innerHTML=steps.map((s,i)=>`<div class="timeline-item" data-i="${i}"><div class="timeline-dot"></div>${s}</div>`).join('');
+        let cur=0;document.getElementById('webStep').onclick=()=>{if(cur<steps.length){document.querySelector(`.timeline-item[data-i="${cur}"]`).classList.add('active');cur++;}};
       }
     }
 
-    startBtn.addEventListener('click', startScan);
-    stopBtn.addEventListener('click', stopScan);
+    // ===== DDOS DEMO =====
+    function renderDemo_ddos(a,c){
+      demoTitle.innerHTML='<i class="ti ti-bolt"></i> DDoSシミュレーター';
+      c.innerHTML=`<svg class="demo-svg" id="ddosSvg" viewBox="0 0 400 200"></svg>
+        <div class="stat-row"><div class="stat-card"><div class="stat-label">CPU負荷</div><div class="stat-value" id="cpuLoad">0%</div></div>
+        <div class="stat-card"><div class="stat-label">パケット数</div><div class="stat-value" id="pktNum">0</div></div></div>
+        <div class="btn-group"><button class="demo-btn danger" id="ddosStart"><i class="ti ti-bolt"></i> 攻撃開始</button>
+        <button class="demo-btn secondary" id="ddosReset"><i class="ti ti-refresh"></i> リセット</button></div>
+        <div class="alert-box danger" id="ddosAlert"></div>`;
+      const svg=document.getElementById('ddosSvg');
+      const dirs=a.id===23?1:a.id===25?1:8;
+      svg.innerHTML=`<rect x="170" y="60" width="60" height="80" rx="5" fill="var(--color-bg-primary)" stroke="var(--color-border)"/>
+        <text x="200" y="105" text-anchor="middle" font-size="11" fill="var(--color-text-primary)">Server</text>
+        <rect x="175" y="65" width="50" height="8" fill="var(--color-bg-tertiary)" rx="2"/><rect id="cpuBar" x="175" y="65" width="0" height="8" fill="var(--risk-3)" rx="2"/>
+        <g id="attackers"></g><g id="missiles"></g>`;
+      const atkG=document.getElementById('attackers'),misG=document.getElementById('missiles');
+      const angles=[0,45,90,135,180,225,270,315];
+      for(let i=0;i<dirs;i++){const ang=angles[i]*(Math.PI/180);const x=200+Math.cos(ang)*90,y=100+Math.sin(ang)*60;
+        atkG.innerHTML+=`<text x="${x}" y="${y}" font-size="16" text-anchor="middle">${a.id===23?'🌐':'💻'}</text>`;}
+      let interval=null,load=0,pkts=0;
+      document.getElementById('ddosStart').onclick=()=>{
+        if(interval)return;
+        interval=setInterval(()=>{
+          pkts+=a.id===25?1:dirs;document.getElementById('pktNum').textContent=pkts;
+          load+=a.id===25?100:5;if(load>100)load=100;
+          document.getElementById('cpuLoad').textContent=load+'%';document.getElementById('cpuBar').setAttribute('width',load/2);
+          for(let i=0;i<(a.id===25?1:dirs);i++){
+            const ang=angles[i%8]*(Math.PI/180);const sx=200+Math.cos(ang)*80,sy=100+Math.sin(ang)*50;
+            const m=document.createElementNS('http://www.w3.org/2000/svg','circle');
+            m.setAttribute('r',a.id===25?'12':'4');m.setAttribute('fill','#ef4444');
+            m.innerHTML=`<animate attributeName="cx" from="${sx}" to="200" dur="0.3s" fill="freeze"/>
+              <animate attributeName="cy" from="${sy}" to="100" dur="0.3s" fill="freeze"/>
+              <animate attributeName="opacity" from="1" to="0" begin="0.25s" dur="0.05s" fill="freeze"/>`;
+            misG.appendChild(m);setTimeout(()=>m.remove(),350);
+          }
+          if(load>=100){clearInterval(interval);interval=null;const al=document.getElementById('ddosAlert');al.innerHTML='<strong>💥 サーバーダウン！</strong>';al.classList.add('show');}
+        },200);
+      };
+      document.getElementById('ddosReset').onclick=()=>{clearInterval(interval);interval=null;load=pkts=0;
+        document.getElementById('cpuLoad').textContent='0%';document.getElementById('pktNum').textContent='0';
+        document.getElementById('cpuBar').setAttribute('width',0);document.getElementById('ddosAlert').classList.remove('show');};
+    }
 
-    initNetwork();
+    // ===== INTERCEPT DEMO =====
+    function renderDemo_intercept(a,c){
+      demoTitle.innerHTML='<i class="ti ti-ear"></i> 傍受シミュレーター';
+      c.innerHTML=`<svg class="demo-svg" id="intSvg" viewBox="0 0 400 150"></svg>
+        <div class="btn-group"><button class="demo-btn danger" id="intStart"><i class="ti ti-eye"></i> 傍受開始</button>
+        <button class="demo-btn secondary" id="intReset"><i class="ti ti-refresh"></i> リセット</button></div>
+        <div class="demo-log" id="intLog" style="margin-top:1rem"></div>`;
+      const svg=document.getElementById('intSvg');
+      svg.innerHTML=`<text x="30" y="80" font-size="24">👤</text><text x="20" y="100" font-size="9" fill="var(--color-text-secondary)">ユーザー</text>
+        <text x="340" y="80" font-size="24">🖥</text><text x="330" y="100" font-size="9" fill="var(--color-text-secondary)">サーバー</text>
+        <text x="185" y="80" font-size="24" id="attacker" style="opacity:0.3">😈</text>
+        <line id="line1" x1="60" y1="75" x2="170" y2="75" stroke="var(--color-border)" stroke-width="2"/>
+        <line id="line2" x1="230" y1="75" x2="330" y2="75" stroke="var(--color-border)" stroke-width="2"/>
+        <g id="intPackets"></g>`;
+      const logEl=document.getElementById('intLog'),pktG=document.getElementById('intPackets');
+      const samples=a.id===14?['Cookie: session=abc123xyz','GET /account HTTP/1.1']:
+        a.id===16?['送金額: 1,000円 → 改ざん: 100,000円','送金先: suzuki → 改ざん: attacker']:
+        ['GET /login HTTP/1.1','user=tanaka&pass=secret123'];
+      let active=false,i=0;
+      document.getElementById('intStart').onclick=()=>{
+        if(active)return;active=true;
+        document.getElementById('attacker').style.opacity='1';
+        document.getElementById('line1').setAttribute('stroke','#ef4444');
+        document.getElementById('line2').setAttribute('stroke','#ef4444');
+        const iv=setInterval(()=>{
+          if(i>=samples.length*2){clearInterval(iv);return;}
+          log(logEl,'📡 傍受: '+samples[i%samples.length],'log-fail');
+          const p=document.createElementNS('http://www.w3.org/2000/svg','circle');
+          p.setAttribute('r','5');p.setAttribute('fill','#22c55e');p.setAttribute('cy','75');
+          p.innerHTML=`<animate attributeName="cx" from="60" to="330" dur="0.8s" fill="freeze"/>`;
+          pktG.appendChild(p);setTimeout(()=>p.remove(),800);i++;
+        },1000);
+      };
+      document.getElementById('intReset').onclick=()=>{active=false;i=0;logEl.innerHTML='';
+        document.getElementById('attacker').style.opacity='0.3';
+        document.getElementById('line1').setAttribute('stroke','var(--color-border)');
+        document.getElementById('line2').setAttribute('stroke','var(--color-border)');};
+    }
+
+    // ===== MISC DEMO =====
+    function renderDemo_misc(a,c){
+      demoTitle.innerHTML='<i class="ti ti-dots"></i> シミュレーター';
+      if(a.id===3){renderDemo_buffer(a,c);}
+      else if(a.id===4){renderDemo_brute(a,c);}
+      else if(a.id===5){renderDemo_dict(a,c);}
+      else if(a.id===6){renderDemo_pwlist(a,c);}
+      else if(a.id===32){renderDemo_zeroday(a,c);}
+      else if(a.id===36){renderDemo_dnshijack(a,c);}
+      else if(a.id===39){renderDemo_supply(a,c);}
+      else{c.innerHTML='<div style="text-align:center;padding:2rem;color:var(--color-text-tertiary)">デモ準備中</div>';}
+    }
+
+    function renderDemo_buffer(a,c){
+      demoTitle.innerHTML='<i class="ti ti-stack"></i> バッファオーバフロー シミュレーター';
+      c.innerHTML=`<div style="background:#1e1e1e;color:#d4d4d4;padding:1rem;border-radius:var(--radius-sm);font-family:monospace;font-size:12px;margin-bottom:1rem">
+        <div><span style="color:#569cd6">void</span> vulnerable(<span style="color:#4ec9b0">char</span> *input) {</div>
+        <div>  <span style="color:#4ec9b0">char</span> buffer[<span style="color:#ce9178">8</span>];</div>
+        <div style="background:rgba(248,81,73,0.2)">  strcpy(buffer, input); <span style="color:#6a9955">// 危険！</span></div>
+        <div>}</div></div>
+        <input class="input-sm" id="bofInput" placeholder="入力データ" style="width:100%;margin-bottom:1rem" maxlength="20">
+        <div class="preset-btns" style="margin-bottom:1rem">
+          <button class="preset-btn" data-v="Hello">正常</button>
+          <button class="preset-btn" data-v="AAAAAAAA">境界</button>
+          <button class="preset-btn" data-v="AAAAAAAAAAAAAAAA">オーバーフロー</button></div>
+        <div style="font-family:monospace;font-size:11px;background:var(--color-bg-secondary);padding:1rem;border-radius:var(--radius-sm)" id="stackView"></div>
+        <div class="alert-box danger" id="bofAlert"></div>`;
+      const stackView=document.getElementById('stackView'),input=document.getElementById('bofInput'),al=document.getElementById('bofAlert');
+      function updateStack(){
+        const v=input.value;
+        const cells=['[buffer  ]','[buffer+4]','[saved EBP]','[ret addr]'];
+        let html='';
+        for(let i=0;i<4;i++){
+          const chunk=v.slice(i*4,(i+1)*4)||'';
+          const danger=i>=2&&chunk.length>0;
+          html+=`<div style="display:flex;padding:4px;${danger?'background:var(--cat-malware-bg);color:var(--cat-malware-text)':''}">
+            <span style="width:80px;color:var(--color-text-tertiary)">${cells[i]}</span><span>${chunk||'----'}</span></div>`;
+        }
+        stackView.innerHTML=html;
+        if(v.length>12){al.innerHTML='<strong>💀 リターンアドレス上書き！</strong> 任意コード実行の危険';al.classList.add('show');}
+        else if(v.length>8){al.innerHTML='<strong>⚠ バッファ境界超過！</strong>';al.classList.add('show');}
+        else{al.classList.remove('show');}
+      }
+      input.addEventListener('input',updateStack);
+      document.querySelectorAll('.preset-btn').forEach(b=>b.onclick=()=>{input.value=b.dataset.v;updateStack();});
+      updateStack();
+    }
+
+    function renderDemo_brute(a,c){
+      demoTitle.innerHTML='<i class="ti ti-key"></i> ブルートフォース シミュレーター';
+      c.innerHTML=`<div class="control-row"><span class="control-label">正解PW</span><input class="input-sm" id="bruteTarget" value="ab3" maxlength="4"></div>
+        <div class="stat-row" style="margin-top:1rem"><div class="stat-card"><div class="stat-label">試行数</div><div class="stat-value" id="bruteCount">0</div></div>
+        <div class="stat-card"><div class="stat-label">現在</div><div class="stat-value" id="bruteCur">-</div></div></div>
+        <div class="btn-group"><button class="demo-btn danger" id="bruteStart"><i class="ti ti-player-play"></i> 開始</button>
+        <button class="demo-btn secondary" id="bruteStop" disabled><i class="ti ti-player-stop"></i> 停止</button></div>
+        <div class="alert-box success" id="bruteAlert"></div>`;
+      const cs='abcdefghijklmnopqrstuvwxyz0123456789';
+      let iv=null,idx=0;
+      function toStr(n,len){let s='';for(let i=0;i<len;i++){s=cs[n%cs.length]+s;n=Math.floor(n/cs.length);}return s;}
+      document.getElementById('bruteStart').onclick=()=>{
+        const target=document.getElementById('bruteTarget').value;idx=0;
+        document.getElementById('bruteStart').disabled=true;document.getElementById('bruteStop').disabled=false;
+        document.getElementById('bruteAlert').classList.remove('show');
+        iv=setInterval(()=>{
+          for(let i=0;i<100;i++){
+            const len=target.length,pw=toStr(idx,len);
+            document.getElementById('bruteCount').textContent=idx;document.getElementById('bruteCur').textContent=pw;
+            if(pw===target){clearInterval(iv);document.getElementById('bruteAlert').innerHTML=`🎉 発見: ${pw}`;
+              document.getElementById('bruteAlert').classList.add('show');document.getElementById('bruteStart').disabled=false;document.getElementById('bruteStop').disabled=true;return;}
+            idx++;
+          }
+        },20);
+      };
+      document.getElementById('bruteStop').onclick=()=>{clearInterval(iv);document.getElementById('bruteStart').disabled=false;document.getElementById('bruteStop').disabled=true;};
+    }
+
+    function renderDemo_dict(a,c){
+      demoTitle.innerHTML='<i class="ti ti-book"></i> 辞書攻撃 シミュレーター';
+      const dict=['123456','password','qwerty','admin','letmein','welcome','monkey','dragon','master','login'];
+      c.innerHTML=`<div class="control-row"><span class="control-label">正解PW</span><input class="input-sm" id="dictTarget" value="password"></div>
+        <div style="height:150px;overflow-y:auto;background:var(--color-bg-secondary);border-radius:var(--radius-sm);padding:.5rem;margin:1rem 0" id="dictList">
+        ${dict.map((d,i)=>`<div class="file-item" data-i="${i}">#${i+1} ${d}</div>`).join('')}</div>
+        <button class="demo-btn danger" id="dictStart"><i class="ti ti-player-play"></i> 開始</button>
+        <div class="alert-box" id="dictAlert"></div>`;
+      document.getElementById('dictStart').onclick=()=>{
+        const target=document.getElementById('dictTarget').value;let i=0;
+        const iv=setInterval(()=>{
+          if(i>=dict.length){clearInterval(iv);const al=document.getElementById('dictAlert');al.className='alert-box danger show';al.innerHTML='辞書に含まれていません';return;}
+          document.querySelectorAll('#dictList .file-item').forEach(el=>el.classList.remove('scanning'));
+          const el=document.querySelector(`#dictList .file-item[data-i="${i}"]`);el.classList.add('scanning');el.scrollIntoView({block:'center'});
+          if(dict[i]===target){clearInterval(iv);el.classList.remove('scanning');el.classList.add('infected');
+            const al=document.getElementById('dictAlert');al.className='alert-box success show';al.innerHTML=`🎉 発見: ${dict[i]} (${i+1}番目)`;}
+          i++;
+        },300);
+      };
+    }
+
+    function renderDemo_pwlist(a,c){
+      demoTitle.innerHTML='<i class="ti ti-list"></i> パスワードリスト攻撃';
+      c.innerHTML=`<div style="font-size:13px;margin-bottom:1rem">漏洩リスト: tanaka / password123</div>
+        <div id="svcList"><div class="file-item" data-s="SNS">🐦 SNS</div><div class="file-item" data-s="銀行">🏦 銀行</div><div class="file-item" data-s="EC">🛒 ECサイト</div></div>
+        <button class="demo-btn danger" id="pwlistStart" style="margin-top:1rem"><i class="ti ti-player-play"></i> 試行開始</button>
+        <div class="alert-box danger" id="pwlistAlert"></div>`;
+      document.getElementById('pwlistStart').onclick=()=>{
+        let i=0;const svcs=['SNS','銀行','EC'];
+        const iv=setInterval(()=>{
+          if(i>=3){clearInterval(iv);const al=document.getElementById('pwlistAlert');
+            al.innerHTML='<strong>⚠ 3サービスで不正ログイン成功！</strong><br>パスワードの使い回しは危険です';al.classList.add('show');return;}
+          const el=document.querySelector(`#svcList .file-item[data-s="${svcs[i]}"]`);el.classList.add('infected');el.innerHTML+=' ✅ ログイン成功';i++;
+        },800);
+      };
+    }
+
+    function renderDemo_zeroday(a,c){
+      demoTitle.innerHTML='<i class="ti ti-clock"></i> ゼロデイ攻撃 タイムライン';
+      const steps=['脆弱性発見（攻撃者）','攻撃実行','被害発生','ベンダー検知','パッチ公開'];
+      c.innerHTML=`<div class="timeline" id="zdTimeline">${steps.map((s,i)=>`<div class="timeline-item${i<3?' active':''}" data-i="${i}"><div class="timeline-dot"></div>${s}</div>`).join('')}</div>
+        <div style="margin-top:1rem;padding:1rem;background:var(--cat-malware-bg);border-radius:var(--radius-sm);color:var(--cat-malware-text)">
+        <strong>⚠ ゼロデイ期間</strong>: パッチ公開前に攻撃が行われる危険な期間</div>`;
+    }
+
+    function renderDemo_dnshijack(a,c){
+      demoTitle.innerHTML='<i class="ti ti-world"></i> ドメイン名ハイジャック';
+      c.innerHTML=`<div style="font-family:monospace;font-size:12px;background:var(--color-bg-secondary);padding:1rem;border-radius:var(--radius-sm)">
+        <div style="margin-bottom:.5rem;font-weight:600">DNS設定 - example.com</div>
+        <div id="dnsA">A レコード: <span id="dnsIP">93.184.216.34</span> (正規)</div>
+        <div>MX レコード: mail.example.com</div></div>
+        <button class="demo-btn danger" id="hijackBtn" style="margin-top:1rem"><i class="ti ti-switch-horizontal"></i> 不正変更</button>
+        <div class="alert-box danger" id="hijackAlert"></div>`;
+      document.getElementById('hijackBtn').onclick=()=>{
+        document.getElementById('dnsIP').textContent='192.168.1.100 (攻撃者)';
+        document.getElementById('dnsIP').style.color='var(--risk-5)';
+        const al=document.getElementById('hijackAlert');al.innerHTML='<strong>⚠ DNS乗っ取り完了！</strong><br>トラフィックが攻撃者サーバーへ誘導されます';al.classList.add('show');
+      };
+    }
+
+    function renderDemo_supply(a,c){
+      demoTitle.innerHTML='<i class="ti ti-package"></i> サプライチェーン攻撃';
+      c.innerHTML=`<div style="font-family:monospace;font-size:12px;background:var(--color-bg-secondary);padding:1rem;border-radius:var(--radius-sm)">
+        <div>📦 my-app@1.0.0</div>
+        <div style="margin-left:1rem">├─ 📦 express@4.18.0</div>
+        <div style="margin-left:1rem">├─ 📦 lodash@4.17.0</div>
+        <div style="margin-left:1rem" id="evilPkg">└─ 📦 event-stream@3.3.6</div>
+        <div style="margin-left:2rem" id="evilDep">   └─ 📦 flatmap-stream@0.1.1</div></div>
+        <button class="demo-btn danger" id="supplyBtn" style="margin-top:1rem"><i class="ti ti-virus"></i> 感染シミュレート</button>
+        <div class="alert-box danger" id="supplyAlert"></div>`;
+      document.getElementById('supplyBtn').onclick=()=>{
+        document.getElementById('evilDep').innerHTML='   └─ 📦 <span style="color:var(--risk-5)">flatmap-stream@0.1.1 🔴 INFECTED</span>';
+        document.getElementById('evilPkg').innerHTML='└─ 📦 <span style="color:var(--risk-5)">event-stream@3.3.6 🔴 INFECTED</span>';
+        const al=document.getElementById('supplyAlert');al.innerHTML='<strong>⚠ サプライチェーン攻撃検出！</strong><br>依存パッケージにマルウェアが混入';al.classList.add('show');
+      };
+    }
+
+    // Render demo based on category
+    const demoRenderers={network:renderDemo_network,malware:renderDemo_malware,social:renderDemo_social,web:renderDemo_web,ddos:renderDemo_ddos,intercept:renderDemo_intercept,misc:renderDemo_misc};
+    if(demoRenderers[attack.category]){demoRenderers[attack.category](attack,demoContainer);}
+    else{demoContainer.innerHTML='<div style="text-align:center;padding:2rem;color:var(--color-text-tertiary)">デモ準備中</div>';}
   </script>
 </body>
 </html>
